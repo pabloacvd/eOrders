@@ -57,6 +57,8 @@ public class OrdenesViewController implements Initializable {
     private ComboBox<?> status;
     @FXML
     private Button btn_saveChanges;
+    @FXML
+    private TextArea detallesEntrega;
         
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -65,7 +67,7 @@ public class OrdenesViewController implements Initializable {
 
     @FXML
     private void btn_saveChanges_pressed(ActionEvent event) {
-        System.out.println("Guardando...");
+        System.out.println("Guardando!");
     }
     
 }

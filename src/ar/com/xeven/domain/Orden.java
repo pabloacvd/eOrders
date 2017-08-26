@@ -103,21 +103,23 @@ public class Orden implements Serializable{
         this.lineasDetalle = lineasDetalle;
     }
 
-    public DoubleProperty getMontoAbonado() {
-        return montoAbonado;
+    public Double getMontoAbonado() {
+        return montoAbonado.get();
     }
 
-    public void setMontoAbonado(DoubleProperty montoAbonado) {
-        this.montoAbonado = montoAbonado;
+    public void setMontoAbonado(Double montoAbonado) {
+        this.montoAbonado.set(montoAbonado);
+    }
+    public DoubleProperty montoAbonadoProperty() {return montoAbonado;}
+
+    public String getStatus() {
+        return status.get();
     }
 
-    public StringProperty getStatus() {
-        return status;
+    public void setStatus(String status) {
+        this.status.set(status);
     }
-
-    public void setStatus(StringProperty status) {
-        this.status = status;
-    }
-
+    
+    // getter para la propiedad
+    public StringProperty statusProperty(){ return status; }
 }
-

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
@@ -43,10 +44,10 @@
           </AnchorPane>
           <AnchorPane minHeight="50.0" minWidth="100.0" prefHeight="398.0" prefWidth="273.0">
              <children>
-                 <GridPane alignment="CENTER_LEFT" focusTraversable="true" AnchorPane.bottomAnchor="5" AnchorPane.leftAnchor="5" AnchorPane.rightAnchor="5" AnchorPane.topAnchor="5">
+                 <GridPane alignment="CENTER_LEFT" focusTraversable="true" vgap="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                      <columnConstraints>
-                         <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0" />
-                         <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="160.0" minWidth="50.0" prefWidth="141.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="189.0" minWidth="50.0" prefWidth="189.0" />
                          <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0" />
                          <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0" />
                          <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0" />
@@ -55,44 +56,70 @@
                      <rowConstraints>
                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                          <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
                          <Label text="Número de orden: " GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
-                         <Label fx:id="orderID" text="" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                         <Label text="Nombre de contacto:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
-                         <TextField fx:id="contactName" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                         <Label fx:id="orderID" text="123" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                         <Label text="Nombre de contacto:" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                         <TextField fx:id="contactName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                         <Label text="Teléfono:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                         <TextField fx:id="contactPhone" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            
+                         <Label text="Fecha de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                         <DatePicker fx:id="deliveryDate" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+
+                         <Label text="Observaciones:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+                         <Label text="Total:" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+                         <Label fx:id="totalAmount" GridPane.columnIndex="3" GridPane.halignment="LEFT" />
+                         <Label text="Monto abonado:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                         <TextField fx:id="paidAmount" maxWidth="200.0" minWidth="100.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                         <Label text="Deuda:" textFill="#5e0606" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                         <Label fx:id="pendingAmount" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
    
-                         <Label text="Fecha de entrega:" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                         <DatePicker fx:id="deliveryDate" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                         <Label text="Teléfono:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                         <TextField fx:id="contactPhone" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                         <Label text="Observaciones:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                         <Label text="Total:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
-                         <Label fx:id="totalAmount" GridPane.columnIndex="5" GridPane.halignment="LEFT" GridPane.rowIndex="0" />
-                         <Label text="Monto abonado:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                         <TextField fx:id="paidAmount" maxWidth="200.0" minWidth="100.0" prefWidth="200.0" GridPane.columnIndex="5" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                         <Label text="Deuda:" textFill="#5e0606" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                         <Label fx:id="pendingAmount" GridPane.columnIndex="5" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
+                         <Label text="Detalles de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                         <TextArea fx:id="detallesEntrega" maxHeight="150.0" prefHeight="50.0" prefWidth="100.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3" GridPane.rowSpan="2" />
    
-                         <Label text="Detalles de entrega:" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                         <TextArea fx:id="detallesEntrega" prefHeight="100.0" prefWidth="100.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.rowSpan="2" />
+                         <Label text="Estado:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                         <ComboBox fx:id="status" GridPane.columnIndex="5" GridPane.rowIndex="1" />
    
-                         <Label text="Estado:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                         <ComboBox fx:id="status" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-   
-                         <Label contentDisplay="CENTER" text="ACA VA EL DETALLE DE CADA LINEA DE PRODUCTO, COMO UNA TABLA ADICIONAL" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-   
-                         <HBox prefHeight="100.0" spacing="15" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
+                         <HBox alignment="BOTTOM_RIGHT" fillHeight="false" prefHeight="100.0" spacing="15" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER">
       <children>
-                               <Button fx:id="btn_saveChanges" mnemonicParsing="false" onAction="#btn_saveChanges_pressed" text="Guardar cambios" />
+                               <Button fx:id="btn_saveChanges" defaultButton="true" mnemonicParsing="false" onAction="#btn_saveChanges_pressed" text="Guardar cambios" />
+                              <Button cancelButton="true" mnemonicParsing="false" text="Cancelar" />
       </children>
+                           <GridPane.margin>
+                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                           </GridPane.margin>
                         </HBox>
-                        <TextArea prefHeight="100.0" prefWidth="100.0" wrapText="true" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.rowSpan="2" />
+                        <TextArea fx:id="additionalDetails" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="5" GridPane.rowSpan="2" />
+                        <TableView editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="5">
+                          <columns>
+                            <TableColumn maxWidth="500.0" minWidth="100.0" prefWidth="150.0" text="Producto" />
+                            <TableColumn maxWidth="200.0" minWidth="50.0" text="Tamaño" />
+                              <TableColumn maxWidth="200.0" minWidth="50.0" text="Cantidad" />
+                              <TableColumn maxWidth="200.0" minWidth="100.0" prefWidth="100.0" text="Precio unitario" />
+                              <TableColumn maxWidth="200.0" minWidth="100.0" prefWidth="180.0" text="Accesorios" />
+                              <TableColumn maxWidth="200.0" minWidth="80.0" text="Subtotal" />
+                          </columns>
+                           <GridPane.margin>
+                              <Insets top="15.0" />
+                           </GridPane.margin>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
                      </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
                  </GridPane>
              </children>
           </AnchorPane>
