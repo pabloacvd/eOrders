@@ -1,6 +1,5 @@
 package ar.com.xeven.domain;
 
-import ar.com.xeven.domain.LineaDetalle;
 import ar.com.xeven.utils.XEVEN;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
@@ -39,7 +38,7 @@ public class Orden implements Serializable{
     public Double getTotal(){
         Double total = 0.00;
         for(LineaDetalle linea: lineasDetalle)
-            total += linea.getTotal();
+            total += linea.getSubtotal();
         return total;
     }
 

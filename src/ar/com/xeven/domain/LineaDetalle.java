@@ -1,11 +1,14 @@
 package ar.com.xeven.domain;
 
 import ar.com.xeven.utils.XEVEN;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 import java.util.Map;
+import javafx.collections.ObservableList;
 
 
 /**
@@ -14,111 +17,104 @@ import java.util.Map;
  * @author Pablo Acevedo
  */
 public class LineaDetalle {
-    private StringProperty lineID;
+    private StringProperty idLinea;
     private ObjectProperty<Producto> producto;
-    private StringProperty pickedSize;
-    private DoubleProperty priceBySize;
-    private MapProperty<LineaDetalle,Double> accessories; // a line of detail for each accessory + its subtotal
-    private DoubleProperty subtotal; // priceBySize + (sum of subtotal of accessories)
-    private IntegerProperty quantity;
+    private StringProperty tamanioElegido;
+    private DoubleProperty precioUnitario;
+    private IntegerProperty cantidad;
+    private ListProperty<LineaDetalle> accesorios; // una linea de detalle por accesorio
+    private DoubleProperty subtotal; // precioUnitario + (subtotal de cada accesorio)
 
-    public LineaDetalle(Producto producto, String pickedSize, Double priceBySize, Map<LineaDetalle, Double> accessories, Integer quantity) {
-        this.lineID = new SimpleStringProperty(XEVEN.generateID("eDET"));
+    public LineaDetalle(Producto producto, String pickedSize, Double priceBySize, List<LineaDetalle> accesorios, Integer quantity) {
+        this.idLinea = new SimpleStringProperty(XEVEN.generateID("eDET"));
         this.producto = new SimpleObjectProperty<>(producto);
-        this.pickedSize = new SimpleStringProperty(pickedSize);
-        this.priceBySize = new SimpleDoubleProperty(priceBySize);
-        this.accessories = new SimpleMapProperty<>(FXCollections.observableMap(accessories));
-        this.quantity = new SimpleIntegerProperty(quantity);
-        this.subtotal = new SimpleDoubleProperty(getTotal());
+        this.tamanioElegido = new SimpleStringProperty(pickedSize);
+        this.precioUnitario = new SimpleDoubleProperty(priceBySize);
+        this.accesorios = new SimpleListProperty<>(FXCollections.observableList(accesorios));
+        this.cantidad = new SimpleIntegerProperty(quantity);
+        this.subtotal = new SimpleDoubleProperty(getSubtotal());
     }
 
-    public Double getTotal(){
-        Double total = this.priceBySize.getValue() * this.quantity.getValue();
-        for(Double subtotal: accessories.values())
-           total += subtotal;
+    public Double getSubtotal(){
+        Double total = this.precioUnitario.getValue() * this.cantidad.getValue();
+        for(LineaDetalle accesorio: accesorios)
+           total += accesorio.getSubtotal();
         return total;
     }
-    public String getLineID() {
-        return lineID.get();
+    
+    public DoubleProperty subtotalProperty() {
+        return subtotal;
     }
 
-    public StringProperty lineIDProperty() {
-        return lineID;
+    public String getIdLinea() {
+        return idLinea.get();
     }
 
-    public void setLineID(String lineID) {
-        this.lineID.set(lineID);
+    public StringProperty idLineaProperty() {
+        return idLinea;
+    }
+
+    public void setIdLinea(String lineID) {
+        this.idLinea.set(lineID);
     }
 
     public Producto getProducto() {
         return producto.get();
     }
 
-    public ObjectProperty<Producto> productProperty() {
+    public ObjectProperty<Producto> productoProperty() {
         return producto;
     }
 
-    public void setProduct(Producto producto) {
+    public void setProducto(Producto producto) {
         this.producto.set(producto);
     }
 
-    public String getPickedSize() {
-        return pickedSize.get();
+    public String getTamanioElegido() {
+        return tamanioElegido.get();
     }
 
-    public StringProperty pickedSizeProperty() {
-        return pickedSize;
+    public StringProperty tamanioElegidoProperty() {
+        return tamanioElegido;
     }
 
-    public void setPickedSize(String pickedSize) {
-        this.pickedSize.set(pickedSize);
+    public void setTamanioElegido(String tamanioElegido) {
+        this.tamanioElegido.set(tamanioElegido);
     }
 
-    public double getPriceBySize() {
-        return priceBySize.get();
+    public double getPrecioUnitario() {
+        return precioUnitario.get();
     }
 
-    public DoubleProperty priceBySizeProperty() {
-        return priceBySize;
+    public DoubleProperty precioUnitarioProperty() {
+        return precioUnitario;
     }
 
-    public void setPriceBySize(double priceBySize) {
-        this.priceBySize.set(priceBySize);
+    public void setPrecioUnitario(double precioUnitario) {
+        this.precioUnitario.set(precioUnitario);
     }
 
-    public ObservableMap<LineaDetalle, Double> getAccessories() {
-        return accessories.get();
+    public ObservableList<LineaDetalle> getAccesorios() {
+        return accesorios.get();
     }
 
-    public MapProperty<LineaDetalle, Double> accessoriesProperty() {
-        return accessories;
+    public ListProperty<LineaDetalle> accesoriosProperty() {
+        return accesorios;
     }
 
-    public void setAccessories(ObservableMap<LineaDetalle, Double> accessories) {
-        this.accessories.set(accessories);
+    public void setAccesorios(ObservableList<LineaDetalle> accesorios) {
+        this.accesorios.set(accesorios);
     }
 
-    public double getSubtotal() {
-        return subtotal.get();
+    public int getCantidad() {
+        return cantidad.get();
     }
 
-    public DoubleProperty subtotalProperty() {
-        return subtotal;
+    public IntegerProperty cantidadProperty() {
+        return cantidad;
     }
 
-    public void setSubtotal(double subtotal) {
-        this.subtotal.set(subtotal);
-    }
-
-    public int getQuantity() {
-        return quantity.get();
-    }
-
-    public IntegerProperty quantityProperty() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity.set(quantity);
+    public void setCantidad(int quantity) {
+        this.cantidad.set(quantity);
     }
 }
