@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * Model class for Purchase orders
+ * Clase modelo para Ordenes de compra
  * @author Pablo Acevedo
  */
 public class Orden implements Serializable{
@@ -19,19 +19,21 @@ public class Orden implements Serializable{
     private ObjectProperty<LocalDate> fechaEntrega;
     private StringProperty detallesEntrega;
     private ListProperty<LineaDetalle> lineasDetalle;
+    private DoubleProperty descuento; // valor de descuento aplicado sobre la orden
     private DoubleProperty montoAbonado; // TODO si mayor a cero -> status = confirmado (actualizar automaticamente)
     private StringProperty status;// TODO status = {nuevo, confirmado, preparado, entregado, cancelado}
     //TODO if status=entregado -> montoAbonado = montoTotal
 
-    public Orden(String contactName, String contactPhone, String additionalDetails, LocalDate deliveryDate, String deliveryDetails, ObservableList<LineaDetalle> detailsLines, Double paidAmount, String status) {
+    public Orden(String nombreContacto, String telefonoContacto, String detallesAdicionales, LocalDate fechaEntrega, String detallesEntrega, ObservableList<LineaDetalle> lineasDetalle, Double montoAbonado, Double descuento, String status) {
         this.idOrden = new SimpleStringProperty(XEVEN.generateID("eOR"));
-        this.nombreContacto = new SimpleStringProperty(contactName);
-        this.telefonoContacto = new SimpleStringProperty(contactPhone);
-        this.detallesAdicionales = new SimpleStringProperty(additionalDetails);
-        this.fechaEntrega = new SimpleObjectProperty<>(deliveryDate);
-        this.detallesEntrega = new SimpleStringProperty(deliveryDetails);
-        this.lineasDetalle = new SimpleListProperty<>(detailsLines);
-        this.montoAbonado = new SimpleDoubleProperty(paidAmount);
+        this.nombreContacto = new SimpleStringProperty(nombreContacto);
+        this.telefonoContacto = new SimpleStringProperty(telefonoContacto);
+        this.detallesAdicionales = new SimpleStringProperty(detallesAdicionales);
+        this.fechaEntrega = new SimpleObjectProperty<>(fechaEntrega);
+        this.detallesEntrega = new SimpleStringProperty(detallesEntrega);
+        this.lineasDetalle = new SimpleListProperty<>(lineasDetalle);
+        this.montoAbonado = new SimpleDoubleProperty(montoAbonado);
+        this.descuento = new SimpleDoubleProperty(descuento);
         this.status = new SimpleStringProperty(status);
     }
 
@@ -48,10 +50,6 @@ public class Orden implements Serializable{
 
     public StringProperty getIdOrden() {
         return idOrden;
-    }
-
-    public void setIdOrden(StringProperty idOrden) {
-        this.idOrden = idOrden;
     }
 
     public StringProperty getNombreContacto() {
@@ -94,31 +92,18 @@ public class Orden implements Serializable{
         this.detallesEntrega = detallesEntrega;
     }
 
-    public ListProperty<LineaDetalle> getLineasDetalle() {
-        return lineasDetalle;
-    }
+    public ListProperty<LineaDetalle> getLineasDetalle() { return lineasDetalle; }
+    public void setLineasDetalle(ListProperty<LineaDetalle> lineasDetalle) { this.lineasDetalle = lineasDetalle; }
 
-    public void setLineasDetalle(ListProperty<LineaDetalle> lineasDetalle) {
-        this.lineasDetalle = lineasDetalle;
-    }
+    public Double getMontoAbonado() { return montoAbonado.get(); }
+    public void setMontoAbonado(Double montoAbonado) { this.montoAbonado.set(montoAbonado); }
+    public DoubleProperty montoAbonadoProperty() { return montoAbonado; }
 
-    public Double getMontoAbonado() {
-        return montoAbonado.get();
-    }
-
-    public void setMontoAbonado(Double montoAbonado) {
-        this.montoAbonado.set(montoAbonado);
-    }
-    public DoubleProperty montoAbonadoProperty() {return montoAbonado;}
-
-    public String getStatus() {
-        return status.get();
-    }
-
-    public void setStatus(String status) {
-        this.status.set(status);
-    }
+    public Double getDescuento() { return descuento.get(); }
+    public void setDescuento(Double descuento) { this.descuento.set(descuento); }
+    public DoubleProperty descuentoProperty() { return descuento; }
     
-    // getter para la propiedad
+    public String getStatus() { return status.get(); }
+    public void setStatus(String status) { this.status.set(status); }    
     public StringProperty statusProperty(){ return status; }
 }

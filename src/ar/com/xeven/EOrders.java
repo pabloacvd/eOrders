@@ -27,6 +27,7 @@ public class EOrders extends Application {
         Scene scene = new Scene(root);
         
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.setTitle("eOrders - XEVEN");
         stage.show();
     }

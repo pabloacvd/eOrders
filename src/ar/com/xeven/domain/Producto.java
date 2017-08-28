@@ -4,7 +4,6 @@ import ar.com.xeven.utils.XEVEN;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -14,89 +13,62 @@ import java.util.*;
  */
 public class Producto {
     private StringProperty prodID;
-    private StringProperty productName;
-    private StringProperty productDetails;
-    private MapProperty<String, Double> priceBySize;
-    private ObjectProperty<LocalDate> priceLastChangedDate;
-    private ListProperty<Producto> availableAccessories;
+    private StringProperty nombreProducto;
+    private StringProperty detallesProducto;
+    private MapProperty<String, Double> precioPorTamanio;
+    private ObjectProperty<LocalDate> fechaModificacionPrecio;
+    private ListProperty<Producto> accesoriosDisponibles;
 
-    public Producto(String productName, String productDetails, Map<String, Double> priceBySize, LocalDate priceLastChangedDate, ObservableList<Producto> availableAccessories) {
+    public Producto(String nombreProducto, String detallesProducto, Map<String, Double> precioPorTamanio, LocalDate fechaModificacionPrecio, ObservableList<Producto> accesoriosDisponibles) {
         this.prodID = new SimpleStringProperty(XEVEN.generateID("ePN"));
-        this.productName = new SimpleStringProperty(productName);
-        this.productDetails = new SimpleStringProperty(productDetails);
-        this.priceBySize = new SimpleMapProperty<>(FXCollections.observableMap(priceBySize));
-        this.priceLastChangedDate = new SimpleObjectProperty<>(priceLastChangedDate);
-        this.availableAccessories = new SimpleListProperty<>(availableAccessories);
-    }
-    public String getProdID() {
-        return prodID.get();
+        this.nombreProducto = new SimpleStringProperty(nombreProducto);
+        this.detallesProducto = new SimpleStringProperty(detallesProducto);
+        this.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
+        this.fechaModificacionPrecio = new SimpleObjectProperty<>(fechaModificacionPrecio);
+        this.accesoriosDisponibles = new SimpleListProperty<>(accesoriosDisponibles);
     }
 
-    public StringProperty prodIDProperty() {
+    public StringProperty getProdID() {
         return prodID;
     }
 
-    public void setProdID(String prodID) {
-        this.prodID.set(prodID);
+    public StringProperty getNombreProducto() {
+        return nombreProducto;
     }
 
-    public String getProductName() {
-        return productName.get();
+    public void setNombreProducto(StringProperty nombreProducto) {
+        this.nombreProducto = nombreProducto;
     }
 
-    public StringProperty productNameProperty() {
-        return productName;
+    public StringProperty getDetallesProducto() {
+        return detallesProducto;
     }
 
-    public void setProductName(String productName) {
-        this.productName.set(productName);
+    public void setDetallesProducto(StringProperty detallesProducto) {
+        this.detallesProducto = detallesProducto;
     }
 
-    public String getProductDetails() {
-        return productDetails.get();
+    public MapProperty<String, Double> getPrecioPorTamanio() {
+        return precioPorTamanio;
     }
 
-    public StringProperty productDetailsProperty() {
-        return productDetails;
+    public void setPrecioPorTamanio(MapProperty<String, Double> precioPorTamanio) {
+        this.precioPorTamanio = precioPorTamanio;
     }
 
-    public void setProductDetails(String productDetails) {
-        this.productDetails.set(productDetails);
+    public ObjectProperty<LocalDate> getFechaModificacionPrecio() {
+        return fechaModificacionPrecio;
     }
 
-    public ObservableMap<String, Double> getPriceBySize() {
-        return priceBySize.get();
+    public void setFechaModificacionPrecio(ObjectProperty<LocalDate> fechaModificacionPrecio) {
+        this.fechaModificacionPrecio = fechaModificacionPrecio;
     }
 
-    public MapProperty<String, Double> priceBySizeProperty() {
-        return priceBySize;
+    public ListProperty<Producto> getAccesoriosDisponibles() {
+        return accesoriosDisponibles;
     }
 
-    public void setPriceBySize(ObservableMap<String, Double> priceBySize) {
-        this.priceBySize.set(priceBySize);
-    }
-
-    public LocalDate getPriceLastChangedDate() {
-        return priceLastChangedDate.get();
-    }
-
-    public ObjectProperty<LocalDate> priceLastChangedDateProperty() {
-        return priceLastChangedDate;
-    }
-
-    public void setPriceLastChangedDate(LocalDate priceLastChangedDate) {
-        this.priceLastChangedDate.set(priceLastChangedDate);
-    }
-
-    public ObservableList<Producto> getAvailableAccessories() {
-        return availableAccessories.get();
-    }
-
-    public ListProperty<Producto> availableAccessoriesProperty() {
-        return availableAccessories;
-    }
-
-    public void setAvailableAccessories(ObservableList<Producto> availableAccessories) {
-        this.availableAccessories.set(availableAccessories);
+    public void setAccesoriosDisponibles(ListProperty<Producto> accesoriosDisponibles) {
+        this.accesoriosDisponibles = accesoriosDisponibles;
     }
 }

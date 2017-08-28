@@ -1,13 +1,9 @@
 package ar.com.xeven.domain;
 
 import ar.com.xeven.utils.XEVEN;
-import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-
-import java.util.Map;
 import javafx.collections.ObservableList;
 
 
@@ -25,13 +21,13 @@ public class LineaDetalle {
     private ListProperty<LineaDetalle> accesorios; // una linea de detalle por accesorio
     private DoubleProperty subtotal; // precioUnitario + (subtotal de cada accesorio)
 
-    public LineaDetalle(Producto producto, String pickedSize, Double priceBySize, List<LineaDetalle> accesorios, Integer quantity) {
+    public LineaDetalle(Producto producto, String tamanioElegido, Double precioUnitario, List<LineaDetalle> accesorios, Integer cantidad) {
         this.idLinea = new SimpleStringProperty(XEVEN.generateID("eDET"));
         this.producto = new SimpleObjectProperty<>(producto);
-        this.tamanioElegido = new SimpleStringProperty(pickedSize);
-        this.precioUnitario = new SimpleDoubleProperty(priceBySize);
+        this.tamanioElegido = new SimpleStringProperty(tamanioElegido);
+        this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
         this.accesorios = new SimpleListProperty<>(FXCollections.observableList(accesorios));
-        this.cantidad = new SimpleIntegerProperty(quantity);
+        this.cantidad = new SimpleIntegerProperty(cantidad);
         this.subtotal = new SimpleDoubleProperty(getSubtotal());
     }
 
@@ -41,10 +37,7 @@ public class LineaDetalle {
            total += accesorio.getSubtotal();
         return total;
     }
-    
-    public DoubleProperty subtotalProperty() {
-        return subtotal;
-    }
+    public DoubleProperty subtotalProperty() { return subtotal; }
 
     public String getIdLinea() {
         return idLinea.get();
@@ -52,10 +45,6 @@ public class LineaDetalle {
 
     public StringProperty idLineaProperty() {
         return idLinea;
-    }
-
-    public void setIdLinea(String lineID) {
-        this.idLinea.set(lineID);
     }
 
     public Producto getProducto() {

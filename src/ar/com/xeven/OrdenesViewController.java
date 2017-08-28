@@ -5,6 +5,8 @@
  */
 package ar.com.xeven;
 
+import ar.com.xeven.domain.LineaDetalle;
+import ar.com.xeven.domain.Orden;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -20,15 +22,16 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 /**
+ * FXML Controller class
  *
- * @author educacionit
+ * @author pacevedo
  */
 public class OrdenesViewController implements Initializable {
-    
+
     @FXML
-    private TableView<?> orderTable;
+    private TableView<Orden> orderTable;
     @FXML
-    private TableColumn<?, ?> orderIDCol;
+    private TableColumn<Orden, Integer> orderIDCol;
     @FXML
     private TableColumn<?, ?> contactNameCol;
     @FXML
@@ -38,37 +41,50 @@ public class OrdenesViewController implements Initializable {
     @FXML
     private TableColumn<?, ?> statusCol;
     @FXML
-    private Label orderID;
+    private Label idOrden;
     @FXML
-    private TextField contactName;
+    private TextField nombreContacto;
     @FXML
-    private DatePicker deliveryDate;
+    private TextField telefonoContacto;
     @FXML
-    private TextField contactPhone;
+    private DatePicker fechaEntrega;
     @FXML
-    private Label totalAmount;
+    private Label total;
     @FXML
-    private TextField paidAmount;
+    private TextField montoAbonado;
     @FXML
-    private Label pendingAmount;
+    private Label montoPendiente;
     @FXML
-    private TextArea additionalDetails;
+    private TextArea detallesEntrega;
     @FXML
     private ComboBox<?> status;
     @FXML
-    private Button btn_saveChanges;
+    private Button btnGuardar;
     @FXML
-    private TextArea detallesEntrega;
-        
+    private Button btnCancelar;
+    @FXML
+    private TextArea detallesAdicionales;
+    @FXML
+    private TableView<LineaDetalle> rptLineasDetalle;
+    @FXML
+    private TextField descuento;
+
+    /**
+     * Initializes the controller class.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        
     }    
 
     @FXML
-    private void btn_saveChanges_pressed(ActionEvent event) {
-        System.out.println("Guardando!");
+    private void guardarOrden(ActionEvent event) {
+        System.out.println("Guardando...");
+    }
+
+    @FXML
+    private void cancelarCambios(ActionEvent event) {
+        System.out.println("Cancelado!");
     }
     
 }
