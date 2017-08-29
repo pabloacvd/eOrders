@@ -40,7 +40,8 @@ public class Orden implements Serializable{
     public Double getTotal(){
         Double total = 0.00;
         for(LineaDetalle linea: lineasDetalle)
-            total += linea.getSubtotal();
+            total += linea.getTotal();
+        total -= this.getDescuento();
         return total;
     }
 
@@ -48,16 +49,20 @@ public class Orden implements Serializable{
         return this.getTotal() - this.montoAbonado.getValue();
     }
 
-    public StringProperty getIdOrden() {
-        return idOrden;
+    public String getIdOrden() {
+        return idOrden.get();
     }
+    public StringProperty idOrdenProperty(){ return idOrden; }
+    
 
     public StringProperty getNombreContacto() {
         return nombreContacto;
     }
-
-    public void setNombreContacto(StringProperty nombreContacto) {
-        this.nombreContacto = nombreContacto;
+    public void setNombreContacto(String nombreContacto) {
+        this.nombreContacto.set(nombreContacto);
+    }
+    public StringProperty nombreContactoProperty() {
+        return this.nombreContacto;
     }
 
     public StringProperty getTelefonoContacto() {

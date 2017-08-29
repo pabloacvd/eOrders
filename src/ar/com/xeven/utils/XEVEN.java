@@ -37,9 +37,7 @@ public class XEVEN {
     }
 
     public static String generateID(String prefix) {
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("mmss");
-        return prefix + sdf.format(date);
+        return prefix + Math.round(Math.random()*1000);
     }
 
     private static Connection con = null;
