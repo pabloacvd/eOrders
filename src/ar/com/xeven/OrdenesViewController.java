@@ -59,68 +59,38 @@ public class OrdenesViewController implements Initializable {
     private ObservableList<String> statusValues;
     
     // GUI
-    @FXML
-    private TableView<Orden> orderTable;
-    @FXML
-    private Label idOrden;
-    @FXML
-    private TextField nombreContacto;
-    @FXML
-    private TextField telefonoContacto;
-    @FXML
-    private DatePicker fechaEntrega;
-    @FXML
-    private Label total;
-    @FXML
-    private TextField montoAbonado;
-    @FXML
-    private Label montoPendiente;
-    @FXML
-    private TextArea detallesEntrega;
-    @FXML
-    private ComboBox<String> status;
-    @FXML
-    private Button btnGuardar;
-    @FXML
-    private TextArea detallesAdicionales;
-    @FXML
-    private TreeTableView<LineaDetalle> rptLineasDetalle;
-    @FXML
-    private TextField descuento;
-    @FXML
-    private MenuItem menuNuevaOrden;
-    @FXML
-    private MenuItem menuCerrar;
-    @FXML
-    private MenuItem menuEliminar;
-    @FXML
-    private MenuItem menuAbout;
-    @FXML
-    private Button btnAgregarProductos;
-    @FXML
-    private TableColumn<Orden, String> colIDOrden;
-    @FXML
-    private TableColumn<Orden, String> colNombreContacto;
-    @FXML
-    private TableColumn<Orden, String> colTelefonoContacto;
-    @FXML
-    private TableColumn<Orden, String> colFechaEntrega;
-    @FXML
-    private TableColumn<Orden, String> colStatus;
-    @FXML
-    private TreeTableColumn<LineaDetalle, String> colProducto;
-    @FXML
-    private TreeTableColumn<LineaDetalle, String> colTamanio;
-    @FXML
-    private TreeTableColumn<LineaDetalle, Integer> colCantidad;
-    @FXML
-    private TreeTableColumn<LineaDetalle, Double> colPrecioUnitario;
-    @FXML
-    private TreeTableColumn<LineaDetalle, Double> colSubtotal;
-    @FXML
-    private TreeTableColumn<LineaDetalle, Double> colTotal;
-    @FXML
-    private GridPane detallesOrden;
+    @FXML private Label idOrden;
+    @FXML private Label montoPendiente;
+    @FXML private Label total;
+    @FXML private DatePicker fechaEntrega;
+    @FXML private TextField nombreContacto;
+    @FXML private TextField telefonoContacto;
+    @FXML private TextField montoAbonado;
+    @FXML private TextField descuento;
+    @FXML private TextArea detallesEntrega;
+    @FXML private TextArea detallesAdicionales;
+    @FXML private ComboBox<String> status;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnNuevaOrden;
+    @FXML private Button btnAgregarProductos;
+    @FXML private MenuItem menuNuevaOrden;
+    @FXML private MenuItem menuCerrar;
+    @FXML private MenuItem menuEliminar;
+    @FXML private MenuItem menuAbout;
+    @FXML private GridPane detallesOrden;
+    @FXML private TableView<Orden> orderTable;
+    @FXML private TableColumn<Orden, String> colIDOrden;
+    @FXML private TableColumn<Orden, String> colNombreContacto;
+    @FXML private TableColumn<Orden, String> colTelefonoContacto;
+    @FXML private TableColumn<Orden, String> colFechaEntrega;
+    @FXML private TableColumn<Orden, String> colStatus;
+    @FXML private TreeTableView<LineaDetalle> rptLineasDetalle;
+    @FXML private TreeTableColumn<LineaDetalle, String> colProducto;
+    @FXML private TreeTableColumn<LineaDetalle, String> colTamanio;
+    @FXML private TreeTableColumn<LineaDetalle, Integer> colCantidad;
+    @FXML private TreeTableColumn<LineaDetalle, Double> colPrecioUnitario;
+    @FXML private TreeTableColumn<LineaDetalle, Double> colSubtotal;
+    @FXML private TreeTableColumn<LineaDetalle, Double> colTotal;
 
     /**
      * Este metodo se llama automaticamente cuando se carga el controller.
@@ -161,8 +131,12 @@ public class OrdenesViewController implements Initializable {
         orderTable.getSelectionModel().selectedIndexProperty().addListener(
                 (observable, valorOriginal, valorNuevo) -> mostrarDetallesOrden(orderTable.getSelectionModel().getSelectedItem()));
         
+        //configuro los botones
+        btnGuardar.setDisable(true);
+        
         // agrego graficos a botones
         btnGuardar.setGraphic(new ImageView(new Image("/resources/color/001_06.png", true)));
+        btnNuevaOrden.setGraphic(new ImageView(new Image("/resources/color/001_45.png", true)));
         btnAgregarProductos.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
     }
      /**
@@ -174,16 +148,16 @@ public class OrdenesViewController implements Initializable {
         idOrden.setText(orden.getIdOrden());
         nombreContacto.setText(orden.getNombreContacto());
         telefonoContacto.setText(orden.getTelefonoContacto());
-        
-        fechaEntrega.setValue(orden.getFechaEntrega());
         detallesEntrega.setText(orden.getDetallesEntrega());
         detallesAdicionales.setText(orden.getDetallesAdicionales().get());
-        status.setValue(orden.getStatus());
 
         total.setText(Double.toString(orden.getTotal()));
         montoAbonado.setText(Double.toString(orden.getMontoAbonado()));
         descuento.setText(Double.toString(orden.getDescuento()));
         montoPendiente.setText(Double.toString(orden.getMontoPendiente()));
+        
+        fechaEntrega.setValue(orden.getFechaEntrega());
+        status.setValue(orden.getStatus());
 
         montoAbonado.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
             Orden ordenSeleccionada = orderTable.getSelectionModel().getSelectedItem();
@@ -203,19 +177,27 @@ public class OrdenesViewController implements Initializable {
         // muestro el form con las ordenes
         detallesOrden.setVisible(true);
     }
-    @FXML private void guardarOrden(ActionEvent event) {
+    @FXML private void nuevaOrden(ActionEvent e){
+        idOrden.setText(null);
+        nombreContacto.setText(null);
+        nombreContacto.requestFocus();
+        telefonoContacto.setText(null);
+        detallesEntrega.setText(null);
+        detallesAdicionales.setText(null);
+        total.setText(null);
+        montoAbonado.setText(null);
+        descuento.setText(null);
+        montoPendiente.setText(null);
+        fechaEntrega.setValue(null);
+        status.setValue(null);
+        rptLineasDetalle.getRoot().getChildren().clear();
+        
+        // configurar botones
+    }
+    @FXML private void guardarOrden(ActionEvent e) {
         System.out.println("Guardando...");
         //tomar la orden que está viendo el usuario y guardarla
         //el mensaje se envia a la clase del modelo, no se resuelve acá
-    }
-
-    @FXML private void cancelarCambios(ActionEvent event) {
-        System.out.println("Cancelado!");
-    }
-
-    @FXML private void nuevaOrden(ActionEvent event) {
-        //esto se resuelve entre la vista, este controlador y el modelo para guardar.
-        //si se usa otra vista, se delega mejor
     }
 
     @FXML private void cerrar(ActionEvent event) {
@@ -225,7 +207,9 @@ public class OrdenesViewController implements Initializable {
     @FXML private void eliminarOrden(ActionEvent event) {
         //eliminar desde el modelo
     }
-
+    @FXML private void agregarProductos(ActionEvent event) {
+        // todo -> abrir frame con drag&drop de productos
+    }
     @FXML private void acercaDe(ActionEvent event) {
         System.out.println("eOrders - Abrir un alert con información del sistema.");
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

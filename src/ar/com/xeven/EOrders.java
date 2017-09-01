@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ar.com.xeven;
 
 import ar.com.xeven.domain.LineaDetalle;
@@ -13,112 +8,99 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
- *
- * @author educacionit
+ * Clase principal para eOrders
+ * @author Pablo Acevedo
  */
-public class EOrders extends Application {
-
-    private static ObservableList<Orden> lstOrdenes;
-    
+public class EOrders extends Application {    
     @Override
     public void start(Stage stage) throws Exception {
-        
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("OrdenesView.fxml"));
-        Parent root = loader.load(); 
-                
+        Parent root = loader.load();
         Scene scene = new Scene(root);
-        
         stage.setScene(scene);
+        /*
+        loader.setLocation(getClass().getResource("ProductosView.fxml"));
+        Parent productos = loader.load();
+        Scene productosScene = new Scene(productos); 
+        stage.setScene(productosScene);//para ver los productos
+        */
         stage.setMaximized(true);
         stage.setTitle("eOrders - XEVEN");
         stage.show();
-        
-        OrdenesViewController controller = loader.getController();
-        controller.setMain(this);
     }
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        
-        EOrders.lstOrdenes = FXCollections.observableArrayList();
-        ObservableList<LineaDetalle> lstLineasDetalle = FXCollections.observableArrayList();
-        ObservableList<LineaDetalle> lstLineasDetalle2 = FXCollections.observableArrayList();
-        
-        Map<String, Double> precioPorTamanio = new HashMap<String, Double>(){{
-            put("Chico", 10.0);
-            put("Medio", 22.20);
-            put("Grande", 35.50);
-            put("Promo", 0.0);
-        }};
-        Map<String, Double> precioPorTamanio2 = new HashMap<String, Double>(){{
-            put("30 personas", 100.0);
-            put("50 personas", 200.50);
-            put("Promo", 0.0);
-        }};
-        
-        
-        // no accessories for this test
-        ObservableList<Producto> accesorios = FXCollections.observableArrayList();
-        
-        Producto accesorio1 = new Producto("Bandeja","Bandeja artesanal",
-                    precioPorTamanio, LocalDate.now(),accesorios);
-        
-        accesorios.add(accesorio1);
-        
-        Producto producto1 = new Producto("Picada XEVEN","Con jamon y otros fiambres.",
-                    precioPorTamanio2, LocalDate.now(),accesorios);
-        
-
-        ObservableList<LineaDetalle> accesoriosSeleccionados = FXCollections.observableArrayList();
-        LineaDetalle lineaAccesorio = new LineaDetalle(accesorio1, "Grande", precioPorTamanio.get("Grande"), new ArrayList<>(), 2);
-        accesoriosSeleccionados.add(lineaAccesorio);
-        
-        LineaDetalle linea1 = new LineaDetalle(producto1, "50 personas",
-                precioPorTamanio2.get("50 personas"), accesoriosSeleccionados, 3);
-
-        lstLineasDetalle.add(linea1);
-        
-        LineaDetalle linea2 = new LineaDetalle(producto1, "30 personas", precioPorTamanio2.get("30 personas"), new ArrayList<>(), 10);
-        ObservableList<LineaDetalle> accesoriosSeleccionados2 = FXCollections.observableArrayList();
-        LineaDetalle lineaAccesorio2 = new LineaDetalle(accesorio1, "Chico", precioPorTamanio.get("Chico"), new ArrayList<>(), 2);
-        accesoriosSeleccionados2.add(lineaAccesorio);
-        accesoriosSeleccionados2.add(lineaAccesorio2);
-        lstLineasDetalle2.add(linea1);
-        lstLineasDetalle2.add(linea2);
-
-      //   String detallesEntrega, ObservableList<LineaDetalle> lineasDetalle, Double montoAbonado, Double descuento, String status) {
-
-        Orden orden1 = new Orden("Pablo Acevedo Areco","+5491123456789",
-                "Profe JavaSE8", LocalDate.now(),"Retira por local 13hs",
-                lstLineasDetalle,10.0, 5.0,"Preparado");
-
-        lstOrdenes.add(orden1);
-        
-        Orden orden2 = new Orden("Linus Torvalds","+358 91911",
-                "GIT and Linux dad", LocalDate.of(2017, Month.JULY, 30),"Entregar por DHL a Finlandia",
-                lstLineasDetalle2,1.0, 0.0,"Confirmado");        
-        lstOrdenes.add(orden2);
-        
+    public static void main(String[] args) {        
         launch(args);
     }
-
-    public static ObservableList<Orden> getLstOrdenes() {
-        return lstOrdenes;
-    }
-
-    public static void setLstOrdenes(ObservableList<Orden> lstOrdenes) {
-        EOrders.lstOrdenes = lstOrdenes;
-    }
 }
+    /*
+    // en este metodo uso menu con css
+//@Override
+public void start3(Stage primaryStage) {
+    Pane root = new Pane();
+    root.setPrefSize(400, 300);
+    Text text = new Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            + " Nullam vehicula justo et sem venenatis mattis non ut quam. "
+            + "Aliquam erat volutpat. Etiam maximus magna quis tortor "
+            + "pellentesque, in sollicitudin odio ullamcorper. Phasellus "
+            + "a quam nisl. Fusce at urna dapibus, elementum quam "
+            + "ultricies, posuere ipsum. Etiam varius orci a tortor "
+            + "vestibulum fringilla. Sed consectetur nunc rhoncus diam "
+            + "volutpat, vitae finibus eros cursus. Praesent quam mauris, "
+            + "lacinia nec metus vitae, blandit faucibus tortor.");
+
+    text.setWrappingWidth(385);
+    text.setLayoutX(15);
+    text.setLayoutY(20);
+
+    VBox menu = new VBox();
+    menu.setId("menu");
+    menu.prefHeightProperty().bind(root.heightProperty());
+    menu.setPrefWidth(200);
+
+    menu.getChildren().addAll(new Button("Something"), new Button("Something else"), new Button("Something different"));
+
+    menu.getStylesheets().add(getClass().getResource("menu.css").toExternalForm());
+    menu.setTranslateX(-190);
+    TranslateTransition menuTranslation = new TranslateTransition(Duration.millis(500), menu);
+
+    menuTranslation.setFromX(-190);
+    menuTranslation.setToX(0);
+
+    menu.setOnMouseEntered(evt -> {
+        menuTranslation.setRate(1);
+        menuTranslation.play();
+    });
+    menu.setOnMouseExited(evt -> {
+        menuTranslation.setRate(-1);
+        menuTranslation.play();
+    });
+
+    root.getChildren().addAll(text, menu);
+
+    Scene scene = new Scene(root);
+
+    primaryStage.setScene(scene);
+    primaryStage.show();
+}
+    */
+    
