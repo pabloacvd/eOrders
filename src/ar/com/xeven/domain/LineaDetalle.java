@@ -19,7 +19,8 @@ public class LineaDetalle {
     private DoubleProperty precioUnitario;
     private IntegerProperty cantidad;
     private ListProperty<LineaDetalle> accesorios; // una linea de detalle por accesorio
-    private DoubleProperty subtotal; // precioUnitario + (subtotal de cada accesorio)
+    private DoubleProperty subtotal; // precioUnitario * cantidad
+    private DoubleProperty total; // precioUnitario + (subtotal de cada accesorio)
 
     public LineaDetalle(Producto producto, String tamanioElegido, Double precioUnitario, List<LineaDetalle> accesorios, Integer cantidad) {
         this.idLinea = new SimpleStringProperty(XEVEN.generateID("eDET"));
@@ -29,16 +30,28 @@ public class LineaDetalle {
         this.accesorios = new SimpleListProperty<>(FXCollections.observableList(accesorios));
         this.cantidad = new SimpleIntegerProperty(cantidad);
         this.subtotal = new SimpleDoubleProperty(getSubtotal());
+        this.total = new SimpleDoubleProperty(getTotal());
     }
 
     public Double getSubtotal(){
-        Double total = this.precioUnitario.getValue() * this.cantidad.getValue();
-        for(LineaDetalle accesorio: accesorios)
-           total += accesorio.getSubtotal();
-        return total;
+        return this.precioUnitario.getValue() * this.cantidad.getValue();
+    }
+    public void setSubtotal(Double subtotal){
+        this.subtotal.set(subtotal);
     }
     public DoubleProperty subtotalProperty() { return subtotal; }
-
+    
+    public Double getTotal(){
+        Double total = this.getSubtotal();
+        for(LineaDetalle accesorio: accesorios)
+           total += accesorio.getTotal();
+        return total;
+    }
+    public void setTotal(Double total){
+        this.total.set(total);
+    }
+    public DoubleProperty totalProperty() { return total; }
+    
     public String getIdLinea() {
         return idLinea.get();
     }

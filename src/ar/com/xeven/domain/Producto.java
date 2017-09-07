@@ -71,4 +71,11 @@ public class Producto {
     public void setAccesoriosDisponibles(ListProperty<Producto> accesoriosDisponibles) {
         this.accesoriosDisponibles = accesoriosDisponibles;
     }
+    
+    public void guardar(){
+        
+    }
+    public void eliminar(){
+        
+    }
 }
