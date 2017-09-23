@@ -46,18 +46,17 @@ public class XEVEN {
         try {
             if (con == null) {
                 Runtime.getRuntime().addShutdownHook(new MyShDwnHook());
-                ResourceBundle rb = ResourceBundle.getBundle("db");
+                ResourceBundle rb = ResourceBundle.getBundle("resources.db");
                 String driver = rb.getString("driver");
                 String url = rb.getString("url");
                 String pwd = rb.getString("pwd");
                 String usr = rb.getString("usr");
-
                 Class.forName(driver);
                 con = DriverManager.getConnection(url, usr, pwd);
             }
             return con;
         } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException("La conexión no pudo ser establecida", e);
+            throw new RuntimeException("La conexión no pudo ser establecida.", e);
         }
     }
 
