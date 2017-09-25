@@ -44,7 +44,7 @@ public class XEVEN {
 
     public static Connection getConnection() {
         try {
-            if (con == null) {
+            if (con == null || con.isClosed()) {
                 Runtime.getRuntime().addShutdownHook(new MyShDwnHook());
                 ResourceBundle rb = ResourceBundle.getBundle("resources.db");
                 String driver = rb.getString("driver");

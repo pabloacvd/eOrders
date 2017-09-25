@@ -1,34 +1,31 @@
 package ar.com.xeven;
 
-import ar.com.xeven.domain.LineaDetalle;
 import ar.com.xeven.domain.Producto;
 import ar.com.xeven.utils.XEVEN;
 import java.net.URL;
 import java.sql.Connection;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.stream.Collectors;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -38,13 +35,21 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
+import javafx.util.Duration;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.NumberStringConverter;
 
 /**
  * FXML Controller class
@@ -54,7 +59,6 @@ import javafx.util.Callback;
 public class ProductosViewController implements Initializable {
     @FXML private MenuItem menuNuevaOrden;
     @FXML private MenuItem menuCerrar;
-    @FXML private MenuItem menuEliminar;
     @FXML private MenuItem menuAbout;
     @FXML private DatePicker fechaPrecio;
     @FXML private Button btnGuardar;
@@ -68,7 +72,7 @@ public class ProductosViewController implements Initializable {
     @FXML private TextField nombreProducto;
     @FXML private TextArea detallesProducto;
     @FXML private CheckBox soloAccesorio;
-    @FXML private Button btnAgregarAccesorios;
+    @FXML private Button btnNuevo;
     @FXML private TableView<Map.Entry<String, Double>> tablaPrecios;
     @FXML private TableColumn<Map.Entry<String, Double>, String> colTamanioPrecio1;
     @FXML private TableColumn<Map.Entry<String, Double>, Double> colTamanioPrecio2;
@@ -77,28 +81,39 @@ public class ProductosViewController implements Initializable {
     @FXML private TableColumn<Producto, String> accesorioDetalles;
     @FXML private TableColumn<Producto, String> accesorioTamanio;
     @FXML private TableColumn<Producto, String> accesorioPrecio;
+    @FXML private MenuItem menuProductos;
+    @FXML private TextField txtTamanio;
+    @FXML private TextField txtPrecio;
+    @FXML private Button botonAgregarPrecio;
+    
+    private double scrollDirection = 0;
+    private Timeline scrolltimeline = new Timeline();
+    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+    @FXML
+    private TextField buscador;
 
-    /**
-     * Initializes the controller class.
-     */
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // cargo el listado de productos desde el modelo
+    public void cargarProductos(String query){
         Connection c = XEVEN.getConnection();
-        ObservableList<Producto> productos = Producto.getProductos(c);
-        tablaProductos.setRoot(new TreeItem<>(productos.get(0)));
+        ObservableList<Producto> productos = Producto.getProductos(query);
+        tablaProductos.setRoot(new TreeItem<>());
         tablaProductos.getRoot().setExpanded(true);
         tablaProductos.setShowRoot(false);
         
         productos.stream().forEach((prod) -> {
-             TreeItem<Producto> producto = new TreeItem<>(prod);
-             producto.setExpanded(false);
-             prod.getAccesoriosDisponibles().forEach((sublinea) -> {
-                 producto.getChildren().add(new TreeItem<>(sublinea));
-            });
+            TreeItem<Producto> producto = new TreeItem<>(prod);
+            producto.setExpanded(true);
+            producto.setGraphic(new ImageView(new Image("/resources/color/001_43.png", true)));
+            prod.getAccesoriosDisponibles().forEach((sublinea) ->
+                producto.getChildren().add(new TreeItem<>(sublinea))
+            );
             tablaProductos.getRoot().getChildren().add(producto);
         });
-        
+    }
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        // cargo el listado de productos desde el modelo
+        cargarProductos("");
+        //configuro las columnas
         colNombre.setCellValueFactory(p -> p.getValue().getValue().getNombreProducto());
         colDetalles.setCellValueFactory(p ->p.getValue().getValue().getDetallesProducto());
         colDetalles.setCellFactory((TreeTableColumn<Producto, String> p) -> {
@@ -120,23 +135,49 @@ public class ProductosViewController implements Initializable {
             String valor = mapa.values().stream().map(i->i.toString()).collect(Collectors.joining("\n"));
             return new SimpleObjectProperty<>(valor);
             });
-        
+        tablaProductos.setRowFactory(this::rowFactory);
         // agrego un listener para la seleccion de un elemento de la tabla
         // esto hace que se pueda a mostrarDetallesOrden() el elemento elegido
         tablaProductos.getSelectionModel().selectedIndexProperty().addListener(
                 (observable, valorOriginal, valorNuevo) -> 
                 mostrarDetallesProducto(tablaProductos.getSelectionModel().getSelectedItem().getValue()));
         //configuro los botones
-        btnGuardar.setDisable(true);
-        
-        // agrego graficos a botones
+        btnGuardar.setDisable(true);      
         btnGuardar.setGraphic(new ImageView(new Image("/resources/color/001_06.png", true)));
-        btnAgregarAccesorios.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
+        btnNuevo.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));    
+        //configuro el scroll para el drag&drop
+        setupScrolling();
+        //cargo el menu contextual
+        loadContextMenus();
+    }
+    private void loadContextMenus(){
+        MenuItem mi1 = new MenuItem("Eliminar accesorio");
+        mi1.setOnAction(e -> {
+            TreeItem<Producto> seleccionado = tablaProductos.getSelectionModel().getSelectedItem();            
+            int padre = Integer.valueOf(seleccionado.getParent().getValue().getProdID().get());
+            seleccionado.getValue().eliminarAccesorio(padre);
+            cargarProductos("");
+        });
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().add(mi1);
+        tablaProductos.setContextMenu(menu);
+        
+        MenuItem mi2 = new MenuItem("Eliminar precio");
+        mi2.setOnAction(e -> {
+            Map.Entry<String, Double> seleccionado = tablaPrecios.getSelectionModel().getSelectedItem();            
+            Producto padre = tablaProductos.getSelectionModel().getSelectedItem().getValue();
+            padre.eliminarPrecio(seleccionado.getKey());
+            tablaPrecios.getItems().remove(seleccionado);
+        });
+        ContextMenu menu2 = new ContextMenu();
+        menu2.getItems().add(mi2);
+        tablaPrecios.setContextMenu(menu2);
     }
     private void mostrarDetallesProducto(Producto producto) {
         prodID.setText(producto.getProdID().get());
         nombreProducto.setText(producto.getNombreProducto().get());
         detallesProducto.setText(producto.getDetallesProducto().get());
+        soloAccesorio.setDisable(false);
         soloAccesorio.setSelected(producto.isSoloAccesorio());
         fechaPrecio.setValue(producto.getFechaModificacionPrecio().get());
         
@@ -144,9 +185,13 @@ public class ProductosViewController implements Initializable {
                 -> new SimpleObjectProperty(param.getValue().getKey()));
         colTamanioPrecio2.setCellValueFactory((TableColumn.CellDataFeatures<Map.Entry<String, Double>, Double> param)
                 -> new SimpleObjectProperty(param.getValue().getValue()));    
+        colTamanioPrecio1.setCellFactory(TextFieldTableCell.forTableColumn());
+        colTamanioPrecio2.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        colTamanioPrecio1.setOnEditCommit(e -> actualizarPrecio(e.getNewValue(), e.getRowValue().getValue()));
+        colTamanioPrecio2.setOnEditCommit(e -> actualizarPrecio(e.getRowValue().getKey(), e.getNewValue()));
         ObservableList<Map.Entry<String, Double>> precios = FXCollections.observableArrayList(producto.getPrecioPorTamanio().entrySet());
         tablaPrecios.setItems(precios);
-
+        botonAgregarPrecio.setDisable(false);
         accesorioTabla.setItems(producto.getAccesoriosDisponibles());
         accesorioNombre.setCellValueFactory(p -> p.getValue().getNombreProducto());
         accesorioNombre.setCellFactory((TableColumn<Producto, String> p) -> {
@@ -178,7 +223,7 @@ public class ProductosViewController implements Initializable {
             String valor = mapa.values().stream().map(i->i.toString()).collect(Collectors.joining("\n"));
             return new SimpleObjectProperty<>(valor);
             });
-        
+        btnGuardar.setDisable(true);
     }
 
     @FXML
@@ -190,22 +235,128 @@ public class ProductosViewController implements Initializable {
     }
 
     @FXML
-    private void eliminarOrden(ActionEvent event) {
-    }
-
-    @FXML
     private void acercaDe(ActionEvent event) {
-    }
-
-
-
-    @FXML
-    private void cancelarCambios(ActionEvent event) {
     }
 
     @FXML
     private void guardarOrden(ActionEvent event) {
     }
 
-    
+    @FXML
+    private void nuevo(ActionEvent event) {
+    }
+
+    private void setupScrolling() {
+        scrolltimeline.setCycleCount(Timeline.INDEFINITE);
+        scrolltimeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), "Scroll", (ActionEvent) -> dragScroll()));
+        tablaProductos.setOnDragExited(event -> {
+            scrollDirection = (event.getY() > 0)?1/tablaProductos.getExpandedItemCount():-1/tablaProductos.getExpandedItemCount(); 
+            scrolltimeline.play();
+        });
+        tablaProductos.setOnDragEntered(e -> scrolltimeline.stop());
+        tablaProductos.setOnDragDone(e -> scrolltimeline.stop());
+    }
+
+    private void dragScroll() {
+        ScrollBar sb = null;
+        for(Node bar : tablaProductos.lookupAll(".scroll-bar"))
+            if(bar instanceof ScrollBar)
+                if (((ScrollBar) bar).getOrientation().equals(Orientation.VERTICAL))
+                    sb = (ScrollBar) bar;
+        if (sb != null) {
+            double nuevoValor = sb.getValue()+scrollDirection;
+            nuevoValor = Math.min(nuevoValor, 1.0);
+            nuevoValor = Math.max(nuevoValor, 0.0);
+            sb.setValue(nuevoValor);
+        }
+    }
+
+    private TreeTableRow<Producto> rowFactory(TreeTableView<Producto> view) {
+        TreeTableRow<Producto> linea = new TreeTableRow<>();
+        linea.setOnDragDetected(event -> {
+            if (!linea.isEmpty()) {
+                Dragboard db = linea.startDragAndDrop(TransferMode.COPY);
+                db.setDragView(linea.snapshot(null, null));
+                ClipboardContent cc = new ClipboardContent();
+                cc.put(SERIALIZED_MIME_TYPE, linea.getIndex());
+                db.setContent(cc);
+                event.consume();
+            }
+        });
+
+        linea.setOnDragOver(event -> {
+            Dragboard db = event.getDragboard();
+            if (acceptable(db, linea)) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                event.consume();
+            }
+        });
+
+        linea.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (acceptable(db, linea)) {
+                int index = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                TreeItem itemArrastrado = tablaProductos.getTreeItem(index);
+                //itemArrastrado.getParent().getChildren().remove(itemArrastrado);
+                getTarget(linea).getChildren().add(itemArrastrado);
+                Producto accesorio = (Producto) itemArrastrado.getValue();
+                linea.getTreeItem().getValue().agregarAccesorio(accesorio);
+                event.setDropCompleted(true);
+                cargarProductos("");
+                tablaProductos.getSelectionModel().select(itemArrastrado);
+                event.consume();
+            }            
+        });
+
+        return linea;
+    }
+
+    private boolean acceptable(Dragboard db, TreeTableRow<Producto> row) {
+        boolean resultado = false;
+        if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+            int index = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+            if (row.getIndex() != index) {
+                TreeItem target = getTarget(row);
+                TreeItem itemArrastrado = tablaProductos.getTreeItem(index);
+                resultado = !esPadre(itemArrastrado, target);
+            }
+        }
+        return resultado;
+    }
+
+    private TreeItem getTarget(TreeTableRow<Producto> row) {
+        TreeItem target = tablaProductos.getRoot();
+        if (!row.isEmpty()) {
+            target = row.getTreeItem();
+        }
+        return target;
+    }
+
+    // evita un bucle en el arbol al soltar sobre su padre
+    private boolean esPadre(TreeItem padre, TreeItem hijo) {
+        boolean resultado = false;
+        while (!resultado && hijo != null) {
+            resultado = hijo.getParent() == padre;
+            hijo = hijo.getParent();
+        }
+        return resultado;
+    }
+
+    @FXML private void agregarPrecio(ActionEvent event) {
+        String nuevoTamanio = txtTamanio.getText();
+        Double nuevoPrecio = Double.valueOf(txtPrecio.getText());
+        actualizarPrecio(nuevoTamanio, nuevoPrecio);
+    }
+    private void actualizarPrecio(String nuevoTamanio, Double nuevoPrecio){
+        Producto prod = tablaProductos.getSelectionModel().getSelectedItem().getValue();
+        prod.agregarPrecio(nuevoTamanio, nuevoPrecio);
+        ObservableList<Map.Entry<String, Double>> precios = FXCollections.observableArrayList(prod.getPrecioPorTamanio().entrySet());
+        tablaPrecios.setItems(precios);
+        txtPrecio.setText("");
+        txtTamanio.setText("");
+    }
+    @FXML
+    private void buscar(KeyEvent event) {
+        cargarProductos(buscador.getText());
+    }
 }

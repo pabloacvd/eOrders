@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.collections.FXCollections;
@@ -123,13 +124,13 @@ public class Orden implements Serializable{
         ObservableList<LineaDetalle> lstLineasDetalle = FXCollections.observableArrayList();
         ObservableList<LineaDetalle> lstLineasDetalle2 = FXCollections.observableArrayList();
         
-        Map<String, Double> precioPorTamanio = new HashMap<String, Double>(){{
+        LinkedHashMap<String, Double> precioPorTamanio = new LinkedHashMap<String, Double>(){{
             put("Chico", 10.0);
             put("Medio", 22.20);
             put("Grande", 35.50);
             put("Promo", 0.0);
         }};
-        Map<String, Double> precioPorTamanio2 = new HashMap<String, Double>(){{
+        LinkedHashMap<String, Double> precioPorTamanio2 = new LinkedHashMap<String, Double>(){{
             put("30 personas", 100.0);
             put("50 personas", 200.50);
             put("Promo", 0.0);
@@ -137,12 +138,12 @@ public class Orden implements Serializable{
         // esta es la lista de accesorios
         ObservableList<Producto> accesorios = FXCollections.observableArrayList();
         
-        Producto accesorio1 = new Producto("Bandeja","Bandeja artesanal",
+        Producto accesorio1 = new Producto(1, "Bandeja","Bandeja artesanal",
                     precioPorTamanio, LocalDate.now(),accesorios);
         
         accesorios.add(accesorio1);
         
-        Producto producto1 = new Producto("Picada XEVEN","Con jamon y otros fiambres.",
+        Producto producto1 = new Producto(2, "Picada XEVEN","Con jamon y otros fiambres.",
                     precioPorTamanio2, LocalDate.now(),accesorios);
         
         ObservableList<LineaDetalle> accesoriosSeleccionados = FXCollections.observableArrayList();

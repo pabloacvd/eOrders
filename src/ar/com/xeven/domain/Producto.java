@@ -2,22 +2,12 @@ package ar.com.xeven.domain;
 
 import ar.com.xeven.utils.XEVEN;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.sql.Blob;
 import java.sql.Connection;
-import static java.sql.JDBCType.BLOB;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import static java.sql.Types.BLOB;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,7 +16,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import javafx.collections.ObservableMap;
 
 /**
  * Created by pacevedo on 5/08/17.
@@ -40,8 +30,8 @@ public class Producto {
     private ListProperty<Producto> accesoriosDisponibles;
     private boolean soloAccesorio;
 
-    public Producto(String nombreProducto, String detallesProducto, Map<String, Double> precioPorTamanio, LocalDate fechaModificacionPrecio, ObservableList<Producto> accesoriosDisponibles) {
-        this.prodID = new SimpleStringProperty(XEVEN.generateID("ePN"));
+    public Producto(Integer prodID, String nombreProducto, String detallesProducto, LinkedHashMap<String, Double> precioPorTamanio, LocalDate fechaModificacionPrecio, ObservableList<Producto> accesoriosDisponibles) {
+        this.prodID = new SimpleStringProperty(prodID.toString());
         this.nombreProducto = new SimpleStringProperty(nombreProducto);
         this.detallesProducto = new SimpleStringProperty(detallesProducto);
         this.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
@@ -49,23 +39,26 @@ public class Producto {
         this.accesoriosDisponibles = new SimpleListProperty<>(accesoriosDisponibles);
     }
     
-    public static ObservableList<Producto> getProductos(Connection c){
+    public static ObservableList<Producto> getProductos(String xql) {
         ObservableList<Producto> lstProductos = FXCollections.observableArrayList();
-        String query = "SELECT * FROM productos WHERE soloAccesorio!=1;";
+        String query = "SELECT * FROM productos WHERE soloAccesorio!=1"; 
+        if(!xql.isEmpty())
+            query += " AND (nombreProducto LIKE '%"+xql+"%' OR detallesProducto LIKE '%"+xql+"%');"; 
+        Connection c = XEVEN.getConnection();
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            save(c);
             stmt = c.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next() ){
                 LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
-                ObservableList<Producto> accesoriosDisponibles = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
-                Producto unProducto = new Producto(rs.getString("nombreProducto"), 
+                ObservableList<Producto> accesorios = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
+                Producto unProducto = new Producto(
+                        rs.getInt("prodID"),
+                        rs.getString("nombreProducto"), 
                         rs.getString("detallesProducto"), precioPorTamanio, 
                         rs.getDate("fechaModificacionPrecio").toLocalDate(),
-                        accesoriosDisponibles);
-                unProducto.setProdID(rs.getInt("prodID"));
+                        accesorios);
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstProductos.add(unProducto);
             }
@@ -75,28 +68,23 @@ public class Producto {
             try{    rs.close();     } catch (SQLException e){}
             try{    stmt.close();   } catch (SQLException e){}       
         }
-        return lstProductos;
+        return lstProductos;       
     }
     
-    public static void save(Connection c) throws SQLException{
-        String WRITE_OBJECT_SQL = "UPDATE `productos` SET `precioPorTamanio` = ?;";
-        PreparedStatement pstmt = c.prepareStatement(WRITE_OBJECT_SQL); 
-        /*Map<String, Double> map = new HashMap<String, Double>();{{
-            put("Promo", 0.0);
-            put("Chico", 10.0);
-            put("Medio", 22.0);
-            put("Grande", 35.50);
-        }};       */
-        LinkedHashMap<String, Double> map = new LinkedHashMap();
-        map.put("Promo",0.0);
-        map.put("Chico",10.0);
-        map.put("Medio",22.0);
-        map.put("Grande",35.4);
-
-        String json = new Gson().toJson(map, new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
-        System.out.println("el json ahora es:"+json);
-        pstmt.setString(1, json);
-        pstmt.executeUpdate();
+    public void actualizarPrecios(ObservableMap<String, Double> precios){
+        String sql = "UPDATE productos SET fechaModificacionPrecio=?, precioPorTamanio=? WHERE prodID=?;";
+        Connection c = XEVEN.getConnection();
+        try {
+            PreparedStatement pstmt = c.prepareStatement(sql); 
+            String mapaJson = new Gson().toJson(precios, new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
+            pstmt.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+            pstmt.setString(2, mapaJson);
+            pstmt.setInt(3, Integer.valueOf(this.prodID.get()));
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precios));
     }
 
     public StringProperty getProdID() {
@@ -142,6 +130,24 @@ public class Producto {
         return this.accesoriosDisponibles;
     }
     
+    public void agregarAccesorio(Producto accesorio){
+        String sql = "INSERT INTO accesoriosPorProducto (prodID, accesorio) VALUES (?, ?);";
+        System.out.println("SQL:"+sql);
+        PreparedStatement stmt;
+        Connection c = XEVEN.getConnection();
+        Integer id = Integer.valueOf(this.prodID.get());
+        try{
+            stmt = c.prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.setInt(2, Integer.valueOf(accesorio.getProdID().get()));
+            if(stmt.executeUpdate()<0)
+                throw new SQLException();
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.accesoriosDisponibles = new SimpleListProperty<>(loadAccesoriosDisponibles(c, id));
+    }
+    
     public static ObservableList<Producto> loadAccesoriosDisponibles(Connection c, int elID){
         ObservableList<Producto> lstAccesorios = FXCollections.observableArrayList();
         // este query es el join que devuelve los accesorios de un producto dado
@@ -155,11 +161,12 @@ public class Producto {
             while(rs.next()){
                 LinkedHashMap<String,Double> precioPorTamanioDelAccesorio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
                 ObservableList<Producto> accesoriosDelAccesorio = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
-                Producto unProducto = new Producto(rs.getString("nombreProducto"), 
+                Producto unProducto = new Producto(
+                        rs.getInt("prodID"),
+                        rs.getString("nombreProducto"), 
                         rs.getString("detallesProducto"), precioPorTamanioDelAccesorio, 
                         rs.getDate("fechaModificacionPrecio").toLocalDate(),
                         accesoriosDelAccesorio);
-                unProducto.setProdID(rs.getInt("prodID"));
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstAccesorios.add(unProducto);
             }
@@ -169,23 +176,51 @@ public class Producto {
         }
         return lstAccesorios;
     }
-
+    public boolean eliminarAccesorio(int parentID){
+        boolean resultado = true;
+        Connection laConexion = XEVEN.getConnection();
+        String sql= "DELETE FROM accesoriosPorProducto WHERE prodID=? AND accesorio=?";
+        PreparedStatement stmt = null;
+        System.out.println("El sql:"+sql+"_"+parentID);
+        try{
+           stmt = laConexion.prepareStatement(sql);
+           stmt.setInt(1, parentID);
+           stmt.setInt(2, Integer.valueOf(this.prodID.get()));
+           if(stmt.executeUpdate() < 0)
+               resultado = false;
+        } catch (SQLException ex) {
+            resultado = false;
+        } finally {
+            try{    stmt.close();   } catch (SQLException e){}       
+            try{    laConexion.close();   } catch (SQLException e){}       
+        }
+        return resultado;
+    }
     public void setAccesoriosDisponibles(ListProperty<Producto> accesoriosDisponibles) {
         this.accesoriosDisponibles = accesoriosDisponibles;
     }
-    
     public boolean isSoloAccesorio() {
         return soloAccesorio;
     }
-
     public void setSoloAccesorio(boolean soloAccesorio) {
         this.soloAccesorio = soloAccesorio;
     }
-    
     public void guardar(){
         
     }
-    public void eliminar(){
-        
+    @Override
+    public String toString() {
+        return "Producto{" + "prodID=" + prodID.get() + ", nombreProducto=" + nombreProducto.get() + '}';
+    }   
+    public void agregarPrecio(String nuevoTamanio, Double nuevoPrecio) {
+        ObservableMap<String,Double> mapa = precioPorTamanio.get();
+        mapa.put(nuevoTamanio, nuevoPrecio);
+        actualizarPrecios(mapa);
+    }
+
+    public void eliminarPrecio(String key) {
+        ObservableMap<String,Double> mapa = precioPorTamanio.get();
+        mapa.remove(key);
+        actualizarPrecios(mapa);       
     }
 }
