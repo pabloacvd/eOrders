@@ -30,13 +30,13 @@
               <menus>
                 <Menu text="Archivo">
                   <items>
-                        <MenuItem fx:id="menuNuevaOrden" onAction="#nuevaOrden" text="_Nueva orden" />
+                    <MenuItem fx:id="menuVerOrdenes" onAction="#verOrdenes" text="_Ver órdenes" />
                     <MenuItem fx:id="menuCerrar" onAction="#cerrar" text="_Cerrar" />
                   </items>
                 </Menu>
                   <Menu mnemonicParsing="false" text="Productos">
                     <items>
-                      <MenuItem mnemonicParsing="false" text="Nuevo producto" />
+                      <MenuItem mnemonicParsing="false" onAction="#nuevo" text="Nuevo producto" />
                         <MenuItem fx:id="menuProductos" mnemonicParsing="false" text="Ver productos" />
                     </items>
                   </Menu>
@@ -59,7 +59,7 @@
                               <Font size="18.0" />
                            </font>
                         </TextField>
-                        <TreeTableView fx:id="tablaProductos" editable="true" prefWidth="977.0" showRoot="false">
+                        <TreeTableView fx:id="tablaProductos" editable="true" prefWidth="977.0" showRoot="false" VBox.vgrow="ALWAYS">
                           <columns>
                             <TreeTableColumn fx:id="colNombre" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="200.0" text="Producto" />
                               <TreeTableColumn fx:id="colDetalles" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="200.0" text="Detalles" />
@@ -79,29 +79,29 @@
                          <ColumnConstraints hgrow="SOMETIMES" percentWidth="31.0" />
                      </columnConstraints>
                      <rowConstraints>
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                         <Label text="Producto: " GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
-                         <Label fx:id="prodID" text="123" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="0" />
-                         <Label text="Nombre:" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                         <TextField fx:id="nombreProducto" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                         <Label text="Producto: " GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                         <Label fx:id="prodID" text="123" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                         <Label text="Nombre:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                         <TextField fx:id="nombreProducto" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
                             
-                               <Label text="Fecha de precio:" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                         <DatePicker fx:id="fechaPrecio" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                               <Label text="Fecha de precio:" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+                         <DatePicker fx:id="fechaPrecio" disable="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
 
-                               <Label text="Detalles:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                        <TextArea fx:id="detallesProducto" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-                      <Button fx:id="btnGuardar" defaultButton="true" disable="true" onAction="#guardarOrden" text="_Guardar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
-                        <TableView fx:id="tablaPrecios" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                               <Label text="Detalles:" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                        <TextArea fx:id="detallesProducto" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                      <Button fx:id="btnGuardar" defaultButton="true" disable="true" onAction="#guardar" text="_Guardar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+                        <TableView fx:id="tablaPrecios" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="5">
                           <columns>
                             <TableColumn fx:id="colTamanioPrecio1" minWidth="150.0" prefWidth="200.0" text="Tamaño" />
                             <TableColumn fx:id="colTamanioPrecio2" minWidth="100.0" prefWidth="150.0" text="Precio" />
@@ -110,8 +110,8 @@
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
                         </TableView>
-                        <CheckBox fx:id="soloAccesorio" disable="true" mnemonicParsing="false" text="Sólo accesorio" GridPane.columnIndex="2" GridPane.halignment="LEFT" />
-                        <TableView fx:id="accesorioTabla" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="6" GridPane.rowSpan="2">
+                        <CheckBox fx:id="soloAccesorio" mnemonicParsing="false" text="Sólo accesorio" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                        <TableView fx:id="accesorioTabla" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="7" GridPane.rowSpan="2">
                           <columns>
                             <TableColumn fx:id="accesorioNombre" editable="false" minWidth="100.0" prefWidth="100.0" text="Accesorio" />
                             <TableColumn fx:id="accesorioDetalles" editable="false" minWidth="100.0" prefWidth="150.0" text="Detalles" />
@@ -122,18 +122,18 @@
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
                         </TableView>
-                        <Button fx:id="btnNuevo" mnemonicParsing="false" onAction="#nuevo" text="Nuevo" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
-                        <TextField fx:id="txtTamanio" promptText="Tamaño" GridPane.halignment="CENTER" GridPane.rowIndex="5">
+                        <Button fx:id="btnNuevo" mnemonicParsing="false" onAction="#nuevo" text="Nuevo" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+                        <TextField fx:id="txtTamanio" promptText="Tamaño" GridPane.halignment="CENTER" GridPane.rowIndex="6">
                            <GridPane.margin>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </GridPane.margin>
                         </TextField>
-                        <TextField fx:id="txtPrecio" promptText="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5">
+                        <TextField fx:id="txtPrecio" promptText="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6">
                            <GridPane.margin>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </GridPane.margin>
                         </TextField>
-                        <Button fx:id="botonAgregarPrecio" disable="true" mnemonicParsing="false" onAction="#agregarPrecio" text="Agregar" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+                        <Button fx:id="botonAgregarPrecio" disable="true" mnemonicParsing="false" onAction="#agregarPrecio" text="Agregar" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

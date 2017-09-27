@@ -2,9 +2,12 @@ package ar.com.xeven;
 
 import ar.com.xeven.domain.Producto;
 import ar.com.xeven.utils.XEVEN;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.animation.KeyFrame;
@@ -15,14 +18,20 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
@@ -47,6 +56,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -57,7 +67,6 @@ import javafx.util.converter.NumberStringConverter;
  * @author pacevedo
  */
 public class ProductosViewController implements Initializable {
-    @FXML private MenuItem menuNuevaOrden;
     @FXML private MenuItem menuCerrar;
     @FXML private MenuItem menuAbout;
     @FXML private DatePicker fechaPrecio;
@@ -91,14 +100,13 @@ public class ProductosViewController implements Initializable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     @FXML
     private TextField buscador;
+    @FXML
+    private MenuItem menuVerOrdenes;
 
     public void cargarProductos(String query){
         Connection c = XEVEN.getConnection();
         ObservableList<Producto> productos = Producto.getProductos(query);
-        tablaProductos.setRoot(new TreeItem<>());
-        tablaProductos.getRoot().setExpanded(true);
-        tablaProductos.setShowRoot(false);
-        
+        tablaProductos.getRoot().getChildren().clear();
         productos.stream().forEach((prod) -> {
             TreeItem<Producto> producto = new TreeItem<>(prod);
             producto.setExpanded(true);
@@ -112,7 +120,12 @@ public class ProductosViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // cargo el listado de productos desde el modelo
+        tablaProductos.setRoot(new TreeItem<>());
+        tablaProductos.getRoot().setExpanded(true);
+        tablaProductos.setShowRoot(false);
         cargarProductos("");
+        configurarTablas();
+        fechaPrecio.setDisable(true);
         //configuro las columnas
         colNombre.setCellValueFactory(p -> p.getValue().getValue().getNombreProducto());
         colDetalles.setCellValueFactory(p ->p.getValue().getValue().getDetallesProducto());
@@ -127,14 +140,16 @@ public class ProductosViewController implements Initializable {
         });
         colTamanio.setCellValueFactory((CellDataFeatures<Producto, String> p) -> {
             ObservableMap<String, Double> mapa = p.getValue().getValue().getPrecioPorTamanio().get();
-            String valor = mapa.keySet().stream().collect(Collectors.joining("\n"));
-            return new SimpleObjectProperty<>(valor);
-            });
+            if(mapa!=null)
+                return new SimpleObjectProperty<>(mapa.keySet().stream().collect(Collectors.joining("\n")));
+            return new SimpleObjectProperty<>();
+        });
         colPrecio.setCellValueFactory((CellDataFeatures<Producto, String> p) -> {
             ObservableMap<String, Double> mapa = p.getValue().getValue().getPrecioPorTamanio().get();
-            String valor = mapa.values().stream().map(i->i.toString()).collect(Collectors.joining("\n"));
-            return new SimpleObjectProperty<>(valor);
-            });
+            if(mapa!=null)
+                return new SimpleObjectProperty<>(mapa.values().stream().map(i->i.toString()).collect(Collectors.joining("\n")));
+            return new SimpleObjectProperty<>();
+        });
         tablaProductos.setRowFactory(this::rowFactory);
         // agrego un listener para la seleccion de un elemento de la tabla
         // esto hace que se pueda a mostrarDetallesOrden() el elemento elegido
@@ -149,13 +164,26 @@ public class ProductosViewController implements Initializable {
         setupScrolling();
         //cargo el menu contextual
         loadContextMenus();
+        //selecciono el primer elemento
+        if(tablaProductos.getRoot().getChildren().size()>0)
+            tablaProductos.getSelectionModel().select(0);
     }
     private void loadContextMenus(){
-        MenuItem mi1 = new MenuItem("Eliminar accesorio");
+        MenuItem mi1 = new MenuItem("Eliminar");
         mi1.setOnAction(e -> {
             TreeItem<Producto> seleccionado = tablaProductos.getSelectionModel().getSelectedItem();            
-            int padre = Integer.valueOf(seleccionado.getParent().getValue().getProdID().get());
-            seleccionado.getValue().eliminarAccesorio(padre);
+            if(seleccionado.getParent().getParent()== null){
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("eOrders - XEVEN");
+                alert.setHeaderText("Eliminar "+seleccionado.getValue().getNombreProducto().get());
+                alert.setContentText("¿Confirma que desea eliminar este producto del catálogo?");
+                alert.showAndWait()
+                    .filter(response -> response == ButtonType.OK)
+                    .ifPresent(response -> seleccionado.getValue().eliminar());
+            }else{
+                int padre = Integer.valueOf(seleccionado.getParent().getValue().getProdID().get());
+                seleccionado.getValue().eliminarAccesorio(padre);
+            }
             cargarProductos("");
         });
         ContextMenu menu = new ContextMenu();
@@ -173,26 +201,8 @@ public class ProductosViewController implements Initializable {
         menu2.getItems().add(mi2);
         tablaPrecios.setContextMenu(menu2);
     }
-    private void mostrarDetallesProducto(Producto producto) {
-        prodID.setText(producto.getProdID().get());
-        nombreProducto.setText(producto.getNombreProducto().get());
-        detallesProducto.setText(producto.getDetallesProducto().get());
-        soloAccesorio.setDisable(false);
-        soloAccesorio.setSelected(producto.isSoloAccesorio());
-        fechaPrecio.setValue(producto.getFechaModificacionPrecio().get());
-        
-        colTamanioPrecio1.setCellValueFactory((TableColumn.CellDataFeatures<Map.Entry<String, Double>, String> param)
-                -> new SimpleObjectProperty(param.getValue().getKey()));
-        colTamanioPrecio2.setCellValueFactory((TableColumn.CellDataFeatures<Map.Entry<String, Double>, Double> param)
-                -> new SimpleObjectProperty(param.getValue().getValue()));    
-        colTamanioPrecio1.setCellFactory(TextFieldTableCell.forTableColumn());
-        colTamanioPrecio2.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        colTamanioPrecio1.setOnEditCommit(e -> actualizarPrecio(e.getNewValue(), e.getRowValue().getValue()));
-        colTamanioPrecio2.setOnEditCommit(e -> actualizarPrecio(e.getRowValue().getKey(), e.getNewValue()));
-        ObservableList<Map.Entry<String, Double>> precios = FXCollections.observableArrayList(producto.getPrecioPorTamanio().entrySet());
-        tablaPrecios.setItems(precios);
-        botonAgregarPrecio.setDisable(false);
-        accesorioTabla.setItems(producto.getAccesoriosDisponibles());
+    private void configurarTablas(){   
+        //tabla accesorios
         accesorioNombre.setCellValueFactory(p -> p.getValue().getNombreProducto());
         accesorioNombre.setCellFactory((TableColumn<Producto, String> p) -> {
             TableCell<Producto, String> cell = new TableCell<>();
@@ -223,27 +233,84 @@ public class ProductosViewController implements Initializable {
             String valor = mapa.values().stream().map(i->i.toString()).collect(Collectors.joining("\n"));
             return new SimpleObjectProperty<>(valor);
             });
+        
+        //tabla precios
+        colTamanioPrecio1.setCellValueFactory((TableColumn.CellDataFeatures<Map.Entry<String, Double>, String> param)
+                -> new SimpleObjectProperty(param.getValue().getKey()));
+        colTamanioPrecio2.setCellValueFactory((TableColumn.CellDataFeatures<Map.Entry<String, Double>, Double> param)
+                -> new SimpleObjectProperty(param.getValue().getValue()));    
+        colTamanioPrecio1.setCellFactory(TextFieldTableCell.forTableColumn());
+        colTamanioPrecio2.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        colTamanioPrecio1.setOnEditCommit(e -> actualizarPrecio(e.getNewValue(), e.getRowValue().getValue()));
+        colTamanioPrecio2.setOnEditCommit(e -> actualizarPrecio(e.getRowValue().getKey(), e.getNewValue()));
+        
+    }
+    private void mostrarDetallesProducto(Producto producto) {
+        prodID.setText(producto.getProdID().get());
+        nombreProducto.setText(producto.getNombreProducto().get());
+        detallesProducto.setText(producto.getDetallesProducto().get());
+        soloAccesorio.setSelected(producto.isSoloAccesorio());
+        fechaPrecio.setValue(producto.getFechaModificacionPrecio().get());
+        fechaPrecio.setVisible(true);
+        ObservableList<Map.Entry<String, Double>> precios = FXCollections.observableArrayList(producto.getPrecioPorTamanio().entrySet());
+        tablaPrecios.setItems(precios);
+        accesorioTabla.setItems(producto.getAccesoriosDisponibles());
+        btnGuardar.setDisable(false);
+        btnGuardar.setText("Guardar");
+        botonAgregarPrecio.setDisable(false);
+    }
+    private void limpiarDetallesProducto() {
+        prodID.setText("Nuevo");
+        nombreProducto.setText("");
+        detallesProducto.setText("");
+        soloAccesorio.setSelected(false);
+        fechaPrecio.setVisible(false);
+        tablaPrecios.getItems().clear();
+        accesorioTabla.getItems().clear();
         btnGuardar.setDisable(true);
+        botonAgregarPrecio.setDisable(true);
     }
-
+    @FXML private void cerrar(ActionEvent event) {
+        System.exit(0);
+    }
+    @FXML private void acercaDe(ActionEvent event) {
+        System.out.println("eOrders - Abrir un alert con información del sistema.");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("eOrders - XEVEN");
+        alert.setHeaderText("eOrders v1.0 - Sistema de gestión de órdenes");
+        alert.setContentText("Para mayor información contactarse a ordenes@xeven.com.ar");
+        alert.showAndWait();
+    }
     @FXML
-    private void nuevaOrden(ActionEvent event) {
+    private void guardar(ActionEvent event) {
+        Producto nuevoProd;
+        if(btnGuardar.getText().equals("Crear")){
+            nuevoProd = new Producto(
+                nombreProducto.getText(),
+                detallesProducto.getText()
+            );
+        }else{
+            nuevoProd = tablaProductos.getSelectionModel().getSelectedItem().getValue();
+            nuevoProd.setNombreProducto(nombreProducto.getText());
+            nuevoProd.setDetallesProducto(detallesProducto.getText());
+            nuevoProd.setSoloAccesorio(soloAccesorio.isSelected());
+            nuevoProd.guardar();
+        }
+        cargarProductos("");
+        seleccionarPorID(nuevoProd.getProdID().get());
     }
-
-    @FXML
-    private void cerrar(ActionEvent event) {
+    private void seleccionarPorID(String prodID) {
+        tablaProductos.getRoot().getChildren().stream()
+                .filter(linea ->linea.getValue().getProdID().get().equals(prodID))
+                .forEachOrdered(linea -> tablaProductos.getSelectionModel().select(linea)
+        );
     }
-
-    @FXML
-    private void acercaDe(ActionEvent event) {
-    }
-
-    @FXML
-    private void guardarOrden(ActionEvent event) {
-    }
-
     @FXML
     private void nuevo(ActionEvent event) {
+        limpiarDetallesProducto();
+        tablaProductos.getSelectionModel().clearSelection();
+        btnGuardar.setDisable(false);
+        btnGuardar.setText("Crear");
     }
 
     private void setupScrolling() {
@@ -358,5 +425,16 @@ public class ProductosViewController implements Initializable {
     @FXML
     private void buscar(KeyEvent event) {
         cargarProductos(buscador.getText());
+    }
+
+    @FXML
+    private void verOrdenes(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("OrdenesView.fxml"));
+        Parent root = loader.load();
+        Stage stage=(Stage) tablaPrecios.getScene().getWindow();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
     }
 }

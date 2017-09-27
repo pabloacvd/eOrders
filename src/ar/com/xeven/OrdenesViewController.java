@@ -9,17 +9,12 @@ import ar.com.xeven.domain.LineaDetalle;
 import ar.com.xeven.domain.Orden;
 import ar.com.xeven.utils.XEVEN;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -33,9 +28,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -44,7 +37,6 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.InputMethodEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.util.converter.IntegerStringConverter;
 
@@ -54,10 +46,8 @@ import javafx.util.converter.IntegerStringConverter;
  * @author pacevedo
  */
 public class OrdenesViewController implements Initializable {
-
     //Datos de aplicacion
     private ObservableList<String> statusValues;
-    
     // GUI
     @FXML private Label idOrden;
     @FXML private Label montoPendiente;
@@ -99,11 +89,12 @@ public class OrdenesViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // cargo el listado de ordenes desde el modelo
-        orderTable.setItems(Orden.getOrdenes());
         orderTable.setEditable(true);
         rptLineasDetalle.setEditable(true);
-        
+        buscarOrdenes("");
+        //selecciono el primer elemento
+        if(!orderTable.getItems().isEmpty())
+            orderTable.getSelectionModel().select(0);
         // cargo columnas simples (no editables)
         colIDOrden.setCellValueFactory(new PropertyValueFactory<>("idOrden"));
         colTelefonoContacto.setCellValueFactory(new PropertyValueFactory<>("telefonoContacto"));
@@ -112,7 +103,10 @@ public class OrdenesViewController implements Initializable {
         // la columna nombre es editable
         colNombreContacto.setCellValueFactory(new PropertyValueFactory<>("nombreContacto"));
         colNombreContacto.setCellFactory(TextFieldTableCell.forTableColumn());
-        colNombreContacto.setOnEditCommit(e -> e.getRowValue().setNombreContacto(e.getNewValue()));
+        colNombreContacto.setOnEditCommit(e -> {
+            e.getRowValue().setNombreContacto(e.getNewValue());
+            e.getRowValue().guardar();
+        });
         
         // cargo la columna de status con los valores de estados de la clase XEVEN (internacionalizada)
         statusValues = FXCollections.observableArrayList();
@@ -120,24 +114,59 @@ public class OrdenesViewController implements Initializable {
             statusValues.add(valor.getSpanish());
         status.setItems(statusValues);//agrego los valores al comboBox status
         
+        colStatus.setEditable(true);
         colStatus.setCellValueFactory(linea -> linea.getValue().statusProperty());
         colStatus.setCellFactory(ComboBoxTableCell.forTableColumn(statusValues));
-        colStatus.setOnEditCommit(e -> e.getRowValue().setStatus(e.getNewValue()));
+        colStatus.setOnEditCommit(e -> {
+            e.getRowValue().setStatus(e.getNewValue());
+            e.getRowValue().guardar();
+        });
 
         //oculto el form de detalles
         detallesOrden.setVisible(false);
         // agrego un listener para la seleccion de un elemento de la tabla
         // esto hace que se pueda a mostrarDetallesOrden() el elemento elegido
         orderTable.getSelectionModel().selectedIndexProperty().addListener(
-                (observable, valorOriginal, valorNuevo) -> mostrarDetallesOrden(orderTable.getSelectionModel().getSelectedItem()));
-        
+            (obs,antes,ahora) -> mostrarDetallesOrden(orderTable.getSelectionModel().getSelectedItem()));
         //configuro los botones
         btnGuardar.setDisable(true);
-        
         // agrego graficos a botones
         btnGuardar.setGraphic(new ImageView(new Image("/resources/color/001_06.png", true)));
         btnNuevaOrden.setGraphic(new ImageView(new Image("/resources/color/001_45.png", true)));
         btnAgregarProductos.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
+        configurarListenersYTablas();
+    }
+    private void configurarListenersYTablas(){
+        montoAbonado.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
+            Orden ordenSeleccionada = orderTable.getSelectionModel().getSelectedItem();
+            if(ordenSeleccionada!=null){
+                ordenSeleccionada.setMontoAbonado(Double.valueOf(valorNuevo));
+                montoPendiente.setText(Double.toString(ordenSeleccionada.getMontoPendiente()));
+            }
+        });
+        descuento.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
+            Orden ordenSeleccionada = orderTable.getSelectionModel().getSelectedItem();
+            if(ordenSeleccionada!=null){
+                ordenSeleccionada.setDescuento(Double.valueOf(valorNuevo));
+                total.setText(Double.toString(ordenSeleccionada.getTotal()));                
+                montoPendiente.setText(Double.toString(ordenSeleccionada.getMontoPendiente()));
+            }
+        });
+        colProducto.setCellValueFactory(param -> param.getValue().getValue().getProducto().getNombreProducto());
+        colTamanio.setCellValueFactory(param -> param.getValue().getValue().tamanioElegidoProperty());
+        colCantidad.setCellValueFactory(param -> param.getValue().getValue().cantidadProperty().asObject());
+        colPrecioUnitario.setCellValueFactory(param -> param.getValue().getValue().precioUnitarioProperty().asObject());
+        colTotal.setCellValueFactory(param -> param.getValue().getValue().totalProperty().asObject());
+        colSubtotal.setCellValueFactory(param -> param.getValue().getValue().subtotalProperty().asObject());
+        
+        colCantidad.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn(new IntegerStringConverter()));
+        colCantidad.setOnEditCommit(event -> {
+            event.getRowValue().getValue().setCantidad(event.getNewValue());
+            event.getRowValue().getValue().setSubtotal(event.getRowValue().getValue().getSubtotal());
+            event.getRowValue().getValue().setTotal(event.getRowValue().getValue().getTotal());
+            this.actualizarMontosManualmente();
+            rptLineasDetalle.getRoot().getChildren().forEach(prod -> prod.getValue().setTotal(prod.getValue().getTotal()));
+        });
     }
      /**
      * Carga todos los detalles de una orden
@@ -145,37 +174,31 @@ public class OrdenesViewController implements Initializable {
      * @param orden
      */
     private void mostrarDetallesOrden(Orden orden) {
-        idOrden.setText(orden.getIdOrden());
-        nombreContacto.setText(orden.getNombreContacto());
-        telefonoContacto.setText(orden.getTelefonoContacto());
-        detallesEntrega.setText(orden.getDetallesEntrega());
-        detallesAdicionales.setText(orden.getDetallesAdicionales().get());
+        if(orden!=null){
+            idOrden.setText(orden.getIdOrden());
+            nombreContacto.setText(orden.getNombreContacto());
+            telefonoContacto.setText(orden.getTelefonoContacto());
+            detallesEntrega.setText(orden.getDetallesEntrega());
+            detallesAdicionales.setText(orden.getDetallesAdicionales().get());
 
-        total.setText(Double.toString(orden.getTotal()));
-        montoAbonado.setText(Double.toString(orden.getMontoAbonado()));
-        descuento.setText(Double.toString(orden.getDescuento()));
-        montoPendiente.setText(Double.toString(orden.getMontoPendiente()));
-        
-        fechaEntrega.setValue(orden.getFechaEntrega());
-        status.setValue(orden.getStatus());
+            total.setText(Double.toString(orden.getTotal()));
+            montoAbonado.setText(Double.toString(orden.getMontoAbonado()));
+            descuento.setText(Double.toString(orden.getDescuento()));
+            montoPendiente.setText(Double.toString(orden.getMontoPendiente()));
 
-        montoAbonado.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
-            Orden ordenSeleccionada = orderTable.getSelectionModel().getSelectedItem();
-            ordenSeleccionada.setMontoAbonado(Double.valueOf(valorNuevo));
-            montoPendiente.setText(Double.toString(ordenSeleccionada.getMontoPendiente()));
-        });
-        descuento.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
-            Orden ordenSeleccionada = orderTable.getSelectionModel().getSelectedItem();
-            ordenSeleccionada.setDescuento(Double.valueOf(valorNuevo));
-            total.setText(Double.toString(ordenSeleccionada.getTotal()));                
-            montoPendiente.setText(Double.toString(ordenSeleccionada.getMontoPendiente()));
-        });
+            fechaEntrega.setValue(orden.getFechaEntrega());
+            status.setValue(orden.getStatus());
 
-        // cargo las lineas de detalle en la tabla
-        mostrarLineasDetalle(orden.getLineasDetalle());
-        
-        // muestro el form con las ordenes
-        detallesOrden.setVisible(true);
+            // cargo las lineas de detalle en la tabla
+            if(orden.getLineasDetalle()!=null)
+                mostrarLineasDetalle(orden.getLineasDetalle());
+            // muestro el form con las ordenes
+            detallesOrden.setVisible(true);
+            // configuro botones
+            btnGuardar.setText("Guardar cambios");
+            btnGuardar.setDisable(false);
+            btnAgregarProductos.setDisable(false);
+        }
     }
     @FXML private void nuevaOrden(ActionEvent e){
         idOrden.setText(null);
@@ -193,11 +216,37 @@ public class OrdenesViewController implements Initializable {
         rptLineasDetalle.getRoot().getChildren().clear();
         
         // configurar botones
+        btnGuardar.setText("Crear nueva");
+        btnAgregarProductos.setDisable(true);
     }
     @FXML private void guardarOrden(ActionEvent e) {
-        System.out.println("Guardando...");
-        //tomar la orden que está viendo el usuario y guardarla
-        //el mensaje se envia a la clase del modelo, no se resuelve acá
+        Orden laOrden;
+        if(btnGuardar.getText().equals("Crear nueva")){
+            laOrden = new Orden(
+                    nombreContacto.getText(),
+                    telefonoContacto.getText(),
+                    detallesAdicionales.getText(),
+                    fechaEntrega.getValue(),
+                    detallesEntrega.getText(),                    
+                    Double.valueOf(montoAbonado.getText()),
+                    Double.valueOf(descuento.getText()),
+                    status.getValue()
+            );
+        }else{
+            laOrden = orderTable.getSelectionModel().getSelectedItem();
+            laOrden.setIdOrden(Integer.valueOf(idOrden.getText()));
+            laOrden.setNombreContacto(nombreContacto.getText());
+            laOrden.setMontoAbonado(Double.valueOf(montoAbonado.getText()));
+            laOrden.setDescuento(Double.valueOf(descuento.getText()));
+            laOrden.setDetallesEntrega(new SimpleStringProperty(detallesEntrega.getText()));
+            laOrden.setTelefonoContacto(new SimpleStringProperty(telefonoContacto.getText()));
+            laOrden.setDetallesAdicionales(new SimpleStringProperty(detallesAdicionales.getText()));
+            laOrden.setFechaEntrega(new SimpleObjectProperty<>(fechaEntrega.getValue()));            
+            laOrden.setStatus(status.getValue());
+            laOrden.guardar();
+        }
+        buscarOrdenes("");
+        seleccionarPorID(laOrden.getIdOrden());
     }
 
     @FXML private void cerrar(ActionEvent event) {
@@ -220,40 +269,14 @@ public class OrdenesViewController implements Initializable {
     }
 
     private void mostrarLineasDetalle(ObservableList<LineaDetalle> lineas) {
-        rptLineasDetalle.setRoot(new TreeItem<>(lineas.get(0)));
+        rptLineasDetalle.setRoot(new TreeItem<>());
         rptLineasDetalle.getRoot().setExpanded(true);
         rptLineasDetalle.setShowRoot(false);
-        
         lineas.stream().forEach((linea) -> {
              TreeItem<LineaDetalle> producto = new TreeItem<>(linea);
              producto.setExpanded(true);
-             producto.addEventHandler(TreeItem.branchCollapsedEvent(),(TreeModificationEvent<String> event) -> {
-                 event.getTreeItem().setExpanded(true);
-             });
-             linea.getAccesorios().forEach((sublinea) -> {
-                 producto.getChildren().add(new TreeItem<>(sublinea));
-            });
+             linea.getAccesorios().forEach(sublinea->producto.getChildren().add(new TreeItem<>(sublinea)));
              rptLineasDetalle.getRoot().getChildren().add(producto);
-        });
-        
-        //En el doble click del producto se tendria que abrir una ventana
-        //con los detalles del producto (DetallesProductoView)
-        colProducto.setCellValueFactory(param -> param.getValue().getValue().getProducto().getNombreProducto());
-        colTamanio.setCellValueFactory(param -> param.getValue().getValue().tamanioElegidoProperty());
-        colCantidad.setCellValueFactory(param -> param.getValue().getValue().cantidadProperty().asObject());
-        colPrecioUnitario.setCellValueFactory(param -> param.getValue().getValue().precioUnitarioProperty().asObject());
-        colTotal.setCellValueFactory(param -> param.getValue().getValue().totalProperty().asObject());
-        colSubtotal.setCellValueFactory(param -> param.getValue().getValue().subtotalProperty().asObject());
-        
-        colCantidad.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn(new IntegerStringConverter()));
-        colCantidad.setOnEditCommit(event -> {
-            event.getRowValue().getValue().setCantidad(event.getNewValue());
-            event.getRowValue().getValue().setSubtotal(event.getRowValue().getValue().getSubtotal());
-            event.getRowValue().getValue().setTotal(event.getRowValue().getValue().getTotal());
-            this.actualizarMontosManualmente();
-            rptLineasDetalle.getRoot().getChildren().forEach((producto) -> {
-                producto.getValue().setTotal(producto.getValue().getTotal());                
-            });
         });
     }
 
@@ -273,5 +296,17 @@ public class OrdenesViewController implements Initializable {
 
     @FXML private void cambioEstado(ActionEvent event) {
         //actualizar el modelo al cambiar el estado (esto puede hacerse al guardar)
+    }
+
+    private void buscarOrdenes(String query) {
+        // cargo el listado de ordenes desde el modelo
+        orderTable.setItems(Orden.getOrdenes(query));
+    }
+
+    private void seleccionarPorID(String idOrden) {
+        orderTable.getItems().stream()
+                .filter(linea ->linea.getIdOrden().equals(idOrden))                        
+                .forEachOrdered(linea -> orderTable.getSelectionModel().select(linea)
+        );
     }
 }

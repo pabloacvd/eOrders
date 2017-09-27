@@ -11,7 +11,7 @@ import java.sql.Statement;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
@@ -51,14 +51,19 @@ public class Producto {
             stmt = c.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next() ){
-                LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
                 ObservableList<Producto> accesorios = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
                 Producto unProducto = new Producto(
                         rs.getInt("prodID"),
                         rs.getString("nombreProducto"), 
-                        rs.getString("detallesProducto"), precioPorTamanio, 
-                        rs.getDate("fechaModificacionPrecio").toLocalDate(),
-                        accesorios);
+                        rs.getString("detallesProducto")
+                );
+                if(rs.getDate("fechaModificacionPrecio") != null)
+                    unProducto.fechaModificacionPrecio = new SimpleObjectProperty<>(rs.getDate("fechaModificacionPrecio").toLocalDate());
+                if(rs.getString("precioPorTamanio") !=null){
+                    LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
+                    unProducto.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
+                }
+                unProducto.accesoriosDisponibles = new SimpleListProperty<>(accesorios);
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstProductos.add(unProducto);
             }
@@ -68,7 +73,35 @@ public class Producto {
             try{    rs.close();     } catch (SQLException e){}
             try{    stmt.close();   } catch (SQLException e){}       
         }
-        return lstProductos;       
+        return lstProductos; 
+    }
+    public Producto(Integer prodID, String nombreProducto, String detallesProducto) {
+        this.prodID = new SimpleStringProperty(prodID.toString());
+        this.nombreProducto = new SimpleStringProperty(nombreProducto);
+        this.detallesProducto = new SimpleStringProperty(detallesProducto);
+        this.precioPorTamanio = new SimpleMapProperty<>();
+        this.fechaModificacionPrecio = new SimpleObjectProperty<>();
+        this.soloAccesorio = false;
+    }
+    public Producto(String nombreProducto, String detallesProducto) {
+        String sql = "INSERT INTO productos (prodID, nombreProducto, detallesProducto, precioPorTamanio, fechaModificacionPrecio, soloAccesorio) VALUES (NULL, ?, ?, NULL, NULL, '0');";
+        Connection c = XEVEN.getConnection();
+        ResultSet rs = null;
+        Integer prodID = 0;
+        try {
+            PreparedStatement pstmt = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setString(1, nombreProducto);
+            pstmt.setString(2, detallesProducto);
+            pstmt.executeUpdate();
+            rs = pstmt.getGeneratedKeys();
+            while(rs.next())
+                prodID = rs.getInt(1);
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.prodID = new SimpleStringProperty(prodID.toString());
+        this.nombreProducto = new SimpleStringProperty(nombreProducto);
+        this.detallesProducto = new SimpleStringProperty(detallesProducto);
     }
     
     public void actualizarPrecios(ObservableMap<String, Double> precios){
@@ -101,13 +134,18 @@ public class Producto {
     public void setNombreProducto(StringProperty nombreProducto) {
         this.nombreProducto = nombreProducto;
     }
+    public void setNombreProducto(String nombreProducto) {
+        this.nombreProducto.set(nombreProducto);
+    }
 
     public StringProperty getDetallesProducto() {
         return detallesProducto;
     }
-
     public void setDetallesProducto(StringProperty detallesProducto) {
         this.detallesProducto = detallesProducto;
+    }
+    public void setDetallesProducto(String detallesProducto) {
+        this.detallesProducto.set(detallesProducto);
     }
 
     public MapProperty<String, Double> getPrecioPorTamanio() {
@@ -121,7 +159,6 @@ public class Producto {
     public ObjectProperty<LocalDate> getFechaModificacionPrecio() {
         return fechaModificacionPrecio;
     }
-
     public void setFechaModificacionPrecio(ObjectProperty<LocalDate> fechaModificacionPrecio) {
         this.fechaModificacionPrecio = fechaModificacionPrecio;
     }
@@ -132,7 +169,6 @@ public class Producto {
     
     public void agregarAccesorio(Producto accesorio){
         String sql = "INSERT INTO accesoriosPorProducto (prodID, accesorio) VALUES (?, ?);";
-        System.out.println("SQL:"+sql);
         PreparedStatement stmt;
         Connection c = XEVEN.getConnection();
         Integer id = Integer.valueOf(this.prodID.get());
@@ -159,14 +195,18 @@ public class Producto {
             stmtConsulta.setInt(1, elID);
             rs = stmtConsulta.executeQuery();
             while(rs.next()){
-                LinkedHashMap<String,Double> precioPorTamanioDelAccesorio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
                 ObservableList<Producto> accesoriosDelAccesorio = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
                 Producto unProducto = new Producto(
                         rs.getInt("prodID"),
                         rs.getString("nombreProducto"), 
-                        rs.getString("detallesProducto"), precioPorTamanioDelAccesorio, 
-                        rs.getDate("fechaModificacionPrecio").toLocalDate(),
-                        accesoriosDelAccesorio);
+                        rs.getString("detallesProducto"));
+                if(rs.getDate("fechaModificacionPrecio") != null)
+                    unProducto.fechaModificacionPrecio = new SimpleObjectProperty<>(rs.getDate("fechaModificacionPrecio").toLocalDate());
+                if(rs.getString("precioPorTamanio") !=null){
+                    LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
+                    unProducto.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
+                }
+                unProducto.accesoriosDisponibles = new SimpleListProperty<>(accesoriosDelAccesorio);
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstAccesorios.add(unProducto);
             }
@@ -176,12 +216,31 @@ public class Producto {
         }
         return lstAccesorios;
     }
+    //elimina un producto de todas las entradas donde es accesorio
+    //esto sirve para cuando se elimina un producto principal, para evitar dejar accesorios huerfanos
+    public boolean eliminarProductoComoAccesorio(){
+        boolean resultado = true;
+        Connection laConexion = XEVEN.getConnection();
+        String sql= "DELETE FROM accesoriosPorProducto WHERE accesorio=?";
+        PreparedStatement stmt = null;
+        try{
+           stmt = laConexion.prepareStatement(sql);
+           stmt.setInt(1, Integer.valueOf(this.prodID.get()));
+           if(stmt.executeUpdate() < 0)
+               resultado = false;
+        } catch (SQLException ex) {
+            resultado = false;
+        } finally {
+            try{    stmt.close();   } catch (SQLException e){}       
+            try{    laConexion.close();   } catch (SQLException e){}       
+        }
+        return resultado;
+    }
     public boolean eliminarAccesorio(int parentID){
         boolean resultado = true;
         Connection laConexion = XEVEN.getConnection();
         String sql= "DELETE FROM accesoriosPorProducto WHERE prodID=? AND accesorio=?";
         PreparedStatement stmt = null;
-        System.out.println("El sql:"+sql+"_"+parentID);
         try{
            stmt = laConexion.prepareStatement(sql);
            stmt.setInt(1, parentID);
@@ -206,7 +265,30 @@ public class Producto {
         this.soloAccesorio = soloAccesorio;
     }
     public void guardar(){
-        
+        String sql = "UPDATE productos SET nombreProducto=?, detallesProducto=?, soloAccesorio=? WHERE prodID=?;";
+        Connection c = XEVEN.getConnection();
+        try {
+            PreparedStatement pstmt = c.prepareStatement(sql); 
+            pstmt.setString(1, this.getNombreProducto().get());
+            pstmt.setString(2, this.getDetallesProducto().get());
+            pstmt.setBoolean(3, this.soloAccesorio);
+            pstmt.setString(4, this.getProdID().get());
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void eliminar(){
+        eliminarProductoComoAccesorio();
+        String sql = "DELETE FROM productos WHERE prodID=?;";
+        Connection c = XEVEN.getConnection();
+        try {
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, this.getProdID().get());
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     @Override
     public String toString() {
@@ -214,6 +296,8 @@ public class Producto {
     }   
     public void agregarPrecio(String nuevoTamanio, Double nuevoPrecio) {
         ObservableMap<String,Double> mapa = precioPorTamanio.get();
+        if(mapa==null)
+            mapa = FXCollections.observableMap(new LinkedHashMap<String,Double>());
         mapa.put(nuevoTamanio, nuevoPrecio);
         actualizarPrecios(mapa);
     }
