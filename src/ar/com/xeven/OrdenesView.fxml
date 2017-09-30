@@ -20,6 +20,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane id="AnchorPane" prefHeight="700" prefWidth="1000" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ar.com.xeven.OrdenesViewController">
     <children>
@@ -28,12 +29,8 @@
           <Menu text="Archivo">
             <items>
                   <MenuItem fx:id="menuNuevaOrden" onAction="#nuevaOrden" text="_Nueva orden" />
-              <MenuItem fx:id="menuCerrar" onAction="#cerrar" text="_Cerrar" />
-            </items>
-          </Menu>
-          <Menu text="Editar">
-            <items>
               <MenuItem fx:id="menuEliminar" onAction="#eliminarOrden" text="_Eliminar" />
+              <MenuItem fx:id="menuCerrar" onAction="#cerrar" text="_Cerrar" />
             </items>
           </Menu>
           <Menu text="Ayuda">
@@ -47,11 +44,20 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0">
              <children>
-                 <TableView fx:id="orderTable" prefWidth="218.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+                  <TextField nodeOrientation="LEFT_TO_RIGHT" fx:id="buscador" onKeyTyped="#buscar" promptText="Buscar..." AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </TextField>
+                 <TableView fx:id="orderTable" fixedCellSize="0.0" minHeight="300.0" minWidth="700.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="29.0">
                    <columns>
                        <TableColumn fx:id="colIDOrden" maxWidth="200.0" minWidth="100.0" prefWidth="100.0" text="ID orden" />
-                       <TableColumn fx:id="colNombreContacto" maxWidth="400.0" minWidth="100.0" prefWidth="150.0" text="Nombre" />
-                       <TableColumn fx:id="colTelefonoContacto" editable="false" maxWidth="300.0" minWidth="100.0" prefWidth="150.0" sortable="false" text="Telefono" />
+                       <TableColumn fx:id="colNombreContacto" maxWidth="400.0" minWidth="150.0" prefWidth="195.0" text="Nombre" />
+                       <TableColumn fx:id="colTelefonoContacto" editable="false" maxWidth="300.0" minWidth="66.0" prefWidth="66.0" sortable="false" text="Telefono" />
+                        <TableColumn fx:id="colProductos" maxWidth="500.0" minWidth="100.0" prefWidth="270.0" text="Productos" />
                        <TableColumn fx:id="colFechaEntrega" maxWidth="200.0" minWidth="120.0" prefWidth="120.0" text="Fecha de entrega" />
                        <TableColumn fx:id="colStatus" editable="false" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" text="Estado" />
                    </columns>

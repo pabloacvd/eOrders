@@ -5,9 +5,7 @@ import ar.com.xeven.utils.XEVEN;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
-import java.time.LocalDate;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.animation.KeyFrame;
@@ -59,7 +57,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.DoubleStringConverter;
-import javafx.util.converter.NumberStringConverter;
 
 /**
  * FXML Controller class

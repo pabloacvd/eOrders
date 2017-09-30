@@ -75,6 +75,39 @@ public class Producto {
         }
         return lstProductos; 
     }
+    public Producto(Integer prodID){
+        this.prodID = new SimpleStringProperty(prodID.toString());
+        String query= "SELECT * FROM productos WHERE prodID='"+prodID+"'";
+        Connection c = XEVEN.getConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = c.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next() ){
+                ObservableList<Producto> accesorios = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
+                this.nombreProducto = new SimpleStringProperty(rs.getString("nombreProducto"));
+                this.detallesProducto = new SimpleStringProperty(rs.getString("detallesProducto"));
+                this.accesoriosDisponibles = new SimpleListProperty<>(accesoriosDisponibles);
+                if(rs.getDate("fechaModificacionPrecio") != null)
+                    this.fechaModificacionPrecio = new SimpleObjectProperty<>(rs.getDate("fechaModificacionPrecio").toLocalDate());
+                else
+                    this.fechaModificacionPrecio = new SimpleObjectProperty<>();
+                if(rs.getString("precioPorTamanio") !=null){
+                    LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
+                    this.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
+                }else
+                    this.precioPorTamanio = new SimpleMapProperty<>();
+                this.accesoriosDisponibles = new SimpleListProperty<>(accesorios);
+                this.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try{    rs.close();     } catch (SQLException e){}
+            try{    stmt.close();   } catch (SQLException e){}
+        }
+    }
     public Producto(Integer prodID, String nombreProducto, String detallesProducto) {
         this.prodID = new SimpleStringProperty(prodID.toString());
         this.nombreProducto = new SimpleStringProperty(nombreProducto);

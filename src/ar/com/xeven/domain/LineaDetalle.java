@@ -13,7 +13,7 @@ import javafx.collections.ObservableList;
  * @author Pablo Acevedo
  */
 public class LineaDetalle {
-    private StringProperty idLinea;
+    private StringProperty lineaID;
     private ObjectProperty<Producto> producto;
     private StringProperty tamanioElegido;
     private DoubleProperty precioUnitario;
@@ -23,17 +23,29 @@ public class LineaDetalle {
     private DoubleProperty total; // precioUnitario + (subtotal de cada accesorio)
 
     public LineaDetalle(Producto producto, String tamanioElegido, Double precioUnitario, List<LineaDetalle> accesorios, Integer cantidad) {
-        this.idLinea = new SimpleStringProperty(XEVEN.generateID("eDET"));
         this.producto = new SimpleObjectProperty<>(producto);
         this.tamanioElegido = new SimpleStringProperty(tamanioElegido);
         this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
-        this.accesorios = new SimpleListProperty<>(FXCollections.observableList(accesorios));
+        this.accesorios = new SimpleListProperty<>(FXCollections.observableArrayList(accesorios));
+        this.cantidad = new SimpleIntegerProperty(cantidad);
+        this.subtotal = new SimpleDoubleProperty(getSubtotal());
+        this.total = new SimpleDoubleProperty(getTotal());
+        // INSERT INTO lineaDetalle...
+    }
+    public LineaDetalle(Integer lineaID, Integer prodID, String tamanioElegido, Double precioUnitario, Integer cantidad){
+        this.lineaID = new SimpleStringProperty(String.valueOf(lineaID));
+        this.producto = new SimpleObjectProperty<>(new Producto(prodID));
+        this.tamanioElegido = new SimpleStringProperty(tamanioElegido);
+        this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
+//        this.accesorios = new SimpleListProperty<>(FXCollections.observableArrayList(accesorios));
+        //falta la lógica para los accesorios seleccionados de un producto!
+        this.accesorios = new SimpleListProperty<>(FXCollections.observableArrayList());
         this.cantidad = new SimpleIntegerProperty(cantidad);
         this.subtotal = new SimpleDoubleProperty(getSubtotal());
         this.total = new SimpleDoubleProperty(getTotal());
     }
 
-    public Double getSubtotal(){
+    public final Double getSubtotal(){
         return this.precioUnitario.getValue() * this.cantidad.getValue();
     }
     public void setSubtotal(Double subtotal){
@@ -41,10 +53,9 @@ public class LineaDetalle {
     }
     public DoubleProperty subtotalProperty() { return subtotal; }
     
-    public Double getTotal(){
+    public final Double getTotal(){
         Double total = this.getSubtotal();
-        for(LineaDetalle accesorio: accesorios)
-           total += accesorio.getTotal();
+        total += accesorios.stream().map(accesorio -> accesorio.getTotal()).reduce(total, (accumulator, _item) -> accumulator + _item);
         return total;
     }
     public void setTotal(Double total){
@@ -53,11 +64,11 @@ public class LineaDetalle {
     public DoubleProperty totalProperty() { return total; }
     
     public String getIdLinea() {
-        return idLinea.get();
+        return lineaID.get();
     }
 
     public StringProperty idLineaProperty() {
-        return idLinea;
+        return lineaID;
     }
 
     public Producto getProducto() {

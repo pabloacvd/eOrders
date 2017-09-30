@@ -10,6 +10,7 @@ import ar.com.xeven.domain.Orden;
 import ar.com.xeven.utils.XEVEN;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -37,6 +38,7 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.InputMethodEvent;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.util.converter.IntegerStringConverter;
 
@@ -81,6 +83,8 @@ public class OrdenesViewController implements Initializable {
     @FXML private TreeTableColumn<LineaDetalle, Double> colPrecioUnitario;
     @FXML private TreeTableColumn<LineaDetalle, Double> colSubtotal;
     @FXML private TreeTableColumn<LineaDetalle, Double> colTotal;
+    @FXML private TextField buscador;
+    @FXML private TableColumn<Orden,String> colProductos;
 
     /**
      * Este metodo se llama automaticamente cuando se carga el controller.
@@ -115,6 +119,7 @@ public class OrdenesViewController implements Initializable {
         status.setItems(statusValues);//agrego los valores al comboBox status
         
         colStatus.setEditable(true);
+        // agregar a colStatus un filtro por estado
         colStatus.setCellValueFactory(linea -> linea.getValue().statusProperty());
         colStatus.setCellFactory(ComboBoxTableCell.forTableColumn(statusValues));
         colStatus.setOnEditCommit(e -> {
@@ -159,6 +164,12 @@ public class OrdenesViewController implements Initializable {
         colTotal.setCellValueFactory(param -> param.getValue().getValue().totalProperty().asObject());
         colSubtotal.setCellValueFactory(param -> param.getValue().getValue().subtotalProperty().asObject());
         
+        colProductos.setCellValueFactory(p -> {
+            ObservableList<LineaDetalle> lineas = p.getValue().getLineasDetalle();
+            if(lineas!=null)
+                return new SimpleObjectProperty<>(lineas.stream().map(i->i.getProducto().getNombreProducto().get()).collect(Collectors.joining("\n")));
+            return new SimpleObjectProperty<>();
+        });
         colCantidad.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn(new IntegerStringConverter()));
         colCantidad.setOnEditCommit(event -> {
             event.getRowValue().getValue().setCantidad(event.getNewValue());
@@ -289,7 +300,6 @@ public class OrdenesViewController implements Initializable {
         orderTable.getSelectionModel().clearSelection();
         orderTable.getSelectionModel().select(ordenActual);
     }
-    
     @FXML private void mostrarDetalleProducto(TreeTableColumn.CellEditEvent<LineaDetalle, String> event) {
         System.out.println("Mostrar producto seleccionado");
     }
@@ -308,5 +318,10 @@ public class OrdenesViewController implements Initializable {
                 .filter(linea ->linea.getIdOrden().equals(idOrden))                        
                 .forEachOrdered(linea -> orderTable.getSelectionModel().select(linea)
         );
+    }
+
+    @FXML
+    private void buscar(KeyEvent event) {
+        buscarOrdenes(buscador.getText());        
     }
 }

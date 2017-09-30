@@ -1,9 +1,6 @@
 package ar.com.xeven.domain;
 
-import static ar.com.xeven.domain.Producto.loadAccesoriosDisponibles;
 import ar.com.xeven.utils.XEVEN;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
@@ -15,12 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
@@ -37,7 +30,7 @@ public class Orden implements Serializable{
     private ObjectProperty<LocalDate> fechaEntrega;
     private StringProperty detallesEntrega;
     private ListProperty<LineaDetalle> lineasDetalle;
-    private DoubleProperty descuento; // valor de descuento aplicado sobre la orden
+    private DoubleProperty descuento;
     private DoubleProperty montoAbonado; // TODO si mayor a cero -> status = confirmado (actualizar automaticamente)
     private StringProperty status;// TODO status = {nuevo, confirmado, preparado, entregado, cancelado}
     //TODO if status=entregado -> montoAbonado = montoTotal
@@ -170,44 +163,38 @@ public class Orden implements Serializable{
     public void setStatus(String status) { this.status.set(status); }    
     public StringProperty statusProperty(){ return status; }
     
-    private static ObservableList<LineaDetalle> loadLineasDetalle(Connection c, String lineasDetalle) {
+    private static ObservableList<LineaDetalle> loadLineasDetalle(Connection c, Integer idOrden) {
         // lineasDetalle es un array de IDs o un stream
         ObservableList<LineaDetalle> lstLineasDetalle = FXCollections.observableArrayList();
-        
+        String query = "SELECT * FROM lineasDetalle WHERE idOrden="+idOrden; 
         // query db usando la connection "c" -> no cerrarla!
-        
-
-        LinkedHashMap<String, Double> precioPorTamanio = new LinkedHashMap<String, Double>(){{
-            put("Chico", 10.0);
-            put("Medio", 22.20);
-            put("Grande", 35.50);
-            put("Promo", 0.0);
-        }};
-        ObservableList<Producto> accesorios = FXCollections.observableArrayList();
-        
-        Producto accesorio1 = new Producto(1, "Bandeja","Bandeja artesanal",
-                    precioPorTamanio, LocalDate.now(),accesorios);
-        
-        accesorios.add(accesorio1);
-        
-        Producto producto1 = new Producto(2, "Picada XEVEN","Con jamon y otros fiambres.",
-                    precioPorTamanio, LocalDate.now(),accesorios);
-        
-        ObservableList<LineaDetalle> accesoriosSeleccionados = FXCollections.observableArrayList();
-        LineaDetalle lineaAccesorio = new LineaDetalle(accesorio1, "Grande", precioPorTamanio.get("Grande"), new ArrayList<>(), 2);
-        accesoriosSeleccionados.add(lineaAccesorio);
-        
-        LineaDetalle linea1 = new LineaDetalle(producto1, "50 personas",
-                precioPorTamanio.get("Chico"), accesoriosSeleccionados, 3);
-
-        lstLineasDetalle.add(linea1);
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = c.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                lstLineasDetalle.add(new LineaDetalle(
+                        rs.getInt("lineaID"),
+                        rs.getInt("prodID"),
+                        rs.getString("tamanioElegido"),
+                        rs.getDouble("precioUnitario"),
+                        rs.getInt("cantidad")
+                ));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try{    rs.close();     } catch (SQLException e){}
+            try{    stmt.close();   } catch (SQLException e){}       
+        }
         return lstLineasDetalle;
     }
     public static ObservableList<Orden> getOrdenes(String xql){
         ObservableList<Orden> lstOrdenes = FXCollections.observableArrayList();
         String query = "SELECT * FROM ordenes"; 
         if(!xql.isEmpty())
-            query += " WHERE (nombreProducto LIKE '%"+xql+"%' OR detallesAdicionales LIKE '%"+xql+"%');"; 
+            query += " WHERE (nombreContacto LIKE '%"+xql+"%' OR detallesEntrega LIKE '%"+xql+"%' OR detallesAdicionales LIKE '%"+xql+"%');"; 
         Connection c = XEVEN.getConnection();
         Statement stmt = null;
         ResultSet rs = null;
@@ -215,7 +202,7 @@ public class Orden implements Serializable{
             stmt = c.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next() ){
-                ObservableList<LineaDetalle> lineasDetalle = loadLineasDetalle(c, rs.getString("lineasDetalle"));
+                ObservableList<LineaDetalle> lineasDetalle = loadLineasDetalle(c, rs.getInt("idOrden"));
                 Orden unaOrden = new Orden(String.valueOf(rs.getInt("idOrden")),rs.getString("nombreContacto"));
                 unaOrden.detallesAdicionales = new SimpleStringProperty(rs.getString("detallesAdicionales"));
                 unaOrden.detallesEntrega = new SimpleStringProperty(rs.getString("detallesEntrega"));
