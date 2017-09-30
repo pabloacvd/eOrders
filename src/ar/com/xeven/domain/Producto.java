@@ -221,12 +221,12 @@ public class Producto {
         ObservableList<Producto> lstAccesorios = FXCollections.observableArrayList();
         // este query es el join que devuelve los accesorios de un producto dado
         String query = "SELECT O.* FROM `productos` AS P INNER JOIN accesoriosPorProducto as A ON A.prodID = P.prodID INNER JOIN productos AS O ON A.accesorio = O.prodID WHERE P.prodID = ?";
-        PreparedStatement stmtConsulta;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmtConsulta = c.prepareStatement(query);
-            stmtConsulta.setInt(1, elID);
-            rs = stmtConsulta.executeQuery();
+            stmt = c.prepareStatement(query);
+            stmt.setInt(1, elID);
+            rs = stmt.executeQuery();
             while(rs.next()){
                 ObservableList<Producto> accesoriosDelAccesorio = loadAccesoriosDisponibles(c, rs.getInt("prodID"));
                 Producto unProducto = new Producto(
@@ -243,9 +243,11 @@ public class Producto {
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstAccesorios.add(unProducto);
             }
-            rs.close();
         } catch (SQLException ex) {
             Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try{    rs.close();     } catch (SQLException e){}
+            try{    stmt.close();   } catch (SQLException e){}       
         }
         return lstAccesorios;
     }

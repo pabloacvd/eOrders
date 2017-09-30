@@ -1,7 +1,13 @@
 package ar.com.xeven.domain;
 
 import ar.com.xeven.utils.XEVEN;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,17 +38,47 @@ public class LineaDetalle {
         this.total = new SimpleDoubleProperty(getTotal());
         // INSERT INTO lineaDetalle...
     }
-    public LineaDetalle(Integer lineaID, Integer prodID, String tamanioElegido, Double precioUnitario, Integer cantidad){
+    public LineaDetalle(Integer lineaID, Integer prodID, String tamanioElegido, Double precioUnitario, Integer cantidad, Double subtotal, Double total, Integer idOrden){
         this.lineaID = new SimpleStringProperty(String.valueOf(lineaID));
         this.producto = new SimpleObjectProperty<>(new Producto(prodID));
         this.tamanioElegido = new SimpleStringProperty(tamanioElegido);
         this.precioUnitario = new SimpleDoubleProperty(precioUnitario);
-//        this.accesorios = new SimpleListProperty<>(FXCollections.observableArrayList(accesorios));
-        //falta la lógica para los accesorios seleccionados de un producto!
-        this.accesorios = new SimpleListProperty<>(FXCollections.observableArrayList());
+        this.accesorios = new SimpleListProperty<>(getLineasDetalle(idOrden, lineaID));
         this.cantidad = new SimpleIntegerProperty(cantidad);
-        this.subtotal = new SimpleDoubleProperty(getSubtotal());
+        this.subtotal = new SimpleDoubleProperty(subtotal);
         this.total = new SimpleDoubleProperty(getTotal());
+    }
+    public static ObservableList<LineaDetalle> getLineasDetalle(Integer idOrden, Integer lineaID) {
+        ObservableList<LineaDetalle> lstLineasDetalle = FXCollections.observableArrayList();
+        String query = "SELECT * FROM lineasDetalle as L WHERE L.idOrden="+idOrden;
+        if(lineaID > 0)
+            query+=" AND L.lineaID IN (SELECT A.accesorioID FROM accesoriosPorLineaDetalle AS A WHERE A.accesorioID=L.lineaID AND A.lineaID="+lineaID+")";            
+        else
+            query+=" AND L.lineaID NOT IN (SELECT A.accesorioID FROM accesoriosPorLineaDetalle AS A WHERE A.accesorioID=L.lineaID)";
+        Connection c = XEVEN.getConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = c.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next())
+                lstLineasDetalle.add(new LineaDetalle(
+                        rs.getInt("lineaID"),
+                        rs.getInt("prodID"),
+                        rs.getString("tamanioElegido"),
+                        rs.getDouble("precioUnitario"),
+                        rs.getInt("cantidad"),
+                        rs.getDouble("subtotal"),
+                        rs.getDouble("total"),
+                        rs.getInt("idOrden")
+                ));
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try{    rs.close();     } catch (SQLException e){}
+            try{    stmt.close();   } catch (SQLException e){}       
+        }
+        return lstLineasDetalle;
     }
 
     public final Double getSubtotal(){
@@ -55,7 +91,7 @@ public class LineaDetalle {
     
     public final Double getTotal(){
         Double total = this.getSubtotal();
-        total += accesorios.stream().map(accesorio -> accesorio.getTotal()).reduce(total, (accumulator, _item) -> accumulator + _item);
+        total = accesorios.stream().map(accesorio -> accesorio.getTotal()).reduce(total, (accumulator, _item) -> accumulator + _item);
         return total;
     }
     public void setTotal(Double total){
@@ -110,11 +146,9 @@ public class LineaDetalle {
     public ObservableList<LineaDetalle> getAccesorios() {
         return accesorios.get();
     }
-
     public ListProperty<LineaDetalle> accesoriosProperty() {
         return accesorios;
     }
-
     public void setAccesorios(ObservableList<LineaDetalle> accesorios) {
         this.accesorios.set(accesorios);
     }

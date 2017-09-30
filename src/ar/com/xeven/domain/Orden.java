@@ -163,33 +163,6 @@ public class Orden implements Serializable{
     public void setStatus(String status) { this.status.set(status); }    
     public StringProperty statusProperty(){ return status; }
     
-    private static ObservableList<LineaDetalle> loadLineasDetalle(Connection c, Integer idOrden) {
-        // lineasDetalle es un array de IDs o un stream
-        ObservableList<LineaDetalle> lstLineasDetalle = FXCollections.observableArrayList();
-        String query = "SELECT * FROM lineasDetalle WHERE idOrden="+idOrden; 
-        // query db usando la connection "c" -> no cerrarla!
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = c.createStatement();
-            rs = stmt.executeQuery(query);
-            while(rs.next()){
-                lstLineasDetalle.add(new LineaDetalle(
-                        rs.getInt("lineaID"),
-                        rs.getInt("prodID"),
-                        rs.getString("tamanioElegido"),
-                        rs.getDouble("precioUnitario"),
-                        rs.getInt("cantidad")
-                ));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try{    rs.close();     } catch (SQLException e){}
-            try{    stmt.close();   } catch (SQLException e){}       
-        }
-        return lstLineasDetalle;
-    }
     public static ObservableList<Orden> getOrdenes(String xql){
         ObservableList<Orden> lstOrdenes = FXCollections.observableArrayList();
         String query = "SELECT * FROM ordenes"; 
@@ -202,7 +175,7 @@ public class Orden implements Serializable{
             stmt = c.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next() ){
-                ObservableList<LineaDetalle> lineasDetalle = loadLineasDetalle(c, rs.getInt("idOrden"));
+                ObservableList<LineaDetalle> lineasDetalle = LineaDetalle.getLineasDetalle(rs.getInt("idOrden"), 0);
                 Orden unaOrden = new Orden(String.valueOf(rs.getInt("idOrden")),rs.getString("nombreContacto"));
                 unaOrden.detallesAdicionales = new SimpleStringProperty(rs.getString("detallesAdicionales"));
                 unaOrden.detallesEntrega = new SimpleStringProperty(rs.getString("detallesEntrega"));
