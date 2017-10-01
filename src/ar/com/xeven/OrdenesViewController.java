@@ -7,8 +7,11 @@ package ar.com.xeven;
 
 import ar.com.xeven.domain.LineaDetalle;
 import ar.com.xeven.domain.Orden;
+import ar.com.xeven.domain.Producto;
 import ar.com.xeven.utils.XEVEN;
+import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,13 +20,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -40,6 +45,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 
 /**
@@ -65,16 +71,17 @@ public class OrdenesViewController implements Initializable {
     @FXML private Button btnGuardar;
     @FXML private Button btnNuevaOrden;
     @FXML private Button btnAgregarProductos;
-    @FXML private MenuItem menuNuevaOrden;
-    @FXML private MenuItem menuCerrar;
-    @FXML private MenuItem menuEliminar;
-    @FXML private MenuItem menuAbout;
+    @FXML private Button menuCerrar;
+    @FXML private Button menuEliminar;
+    @FXML private Button menuAbout;
+    @FXML private Button menuVerProductos;
     @FXML private GridPane detallesOrden;
     @FXML private TableView<Orden> orderTable;
     @FXML private TableColumn<Orden, String> colIDOrden;
     @FXML private TableColumn<Orden, String> colNombreContacto;
     @FXML private TableColumn<Orden, String> colTelefonoContacto;
     @FXML private TableColumn<Orden, String> colFechaEntrega;
+    @FXML private TableColumn<Orden,String> colProductos;
     @FXML private TableColumn<Orden, String> colStatus;
     @FXML private TreeTableView<LineaDetalle> rptLineasDetalle;
     @FXML private TreeTableColumn<LineaDetalle, String> colProducto;
@@ -84,7 +91,6 @@ public class OrdenesViewController implements Initializable {
     @FXML private TreeTableColumn<LineaDetalle, Double> colSubtotal;
     @FXML private TreeTableColumn<LineaDetalle, Double> colTotal;
     @FXML private TextField buscador;
-    @FXML private TableColumn<Orden,String> colProductos;
 
     /**
      * Este metodo se llama automaticamente cuando se carga el controller.
@@ -93,12 +99,6 @@ public class OrdenesViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        orderTable.setEditable(true);
-        rptLineasDetalle.setEditable(true);
-        buscarOrdenes("");
-        //selecciono el primer elemento
-        if(!orderTable.getItems().isEmpty())
-            orderTable.getSelectionModel().select(0);
         // cargo columnas simples (no editables)
         colIDOrden.setCellValueFactory(new PropertyValueFactory<>("idOrden"));
         colTelefonoContacto.setCellValueFactory(new PropertyValueFactory<>("telefonoContacto"));
@@ -139,7 +139,17 @@ public class OrdenesViewController implements Initializable {
         btnGuardar.setGraphic(new ImageView(new Image("/resources/color/001_06.png", true)));
         btnNuevaOrden.setGraphic(new ImageView(new Image("/resources/color/001_45.png", true)));
         btnAgregarProductos.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
+        menuCerrar.setGraphic(new ImageView(new Image("/resources/grey/001_42.png", true)));
+        menuEliminar.setGraphic(new ImageView(new Image("/resources/color/001_05.png", true)));
+        menuAbout.setGraphic(new ImageView(new Image("/resources/color/001_42.png", true)));
+        menuVerProductos.setGraphic(new ImageView(new Image("/resources/color/001_43.png", true)));
         configurarListenersYTablas();
+        orderTable.setEditable(true);
+        rptLineasDetalle.setEditable(true);
+        buscarOrdenes("");
+        //selecciono el primer elemento
+        if(!orderTable.getItems().isEmpty())
+            orderTable.getSelectionModel().select(0);
     }
     private void configurarListenersYTablas(){
         montoAbonado.textProperty().addListener((observable, valorOriginal, valorNuevo) -> {
@@ -167,7 +177,12 @@ public class OrdenesViewController implements Initializable {
         colProductos.setCellValueFactory(p -> {
             ObservableList<LineaDetalle> lineas = p.getValue().getLineasDetalle();
             if(lineas!=null)
-                return new SimpleObjectProperty<>(lineas.stream().map(i->i.getProducto().getNombreProducto().get()).collect(Collectors.joining("\n")));
+                return new SimpleObjectProperty<>(lineas.stream().map(i->{
+                    String valorColumna = i.getCantidad()+" "+
+                            i.getProducto().getNombreProducto().get()+
+                            " ("+i.getTamanioElegido()+")";
+                    return valorColumna;
+                        }).collect(Collectors.joining("\n")));
             return new SimpleObjectProperty<>();
         });
         colCantidad.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn(new IntegerStringConverter()));
@@ -212,20 +227,20 @@ public class OrdenesViewController implements Initializable {
         }
     }
     @FXML private void nuevaOrden(ActionEvent e){
-        idOrden.setText(null);
-        nombreContacto.setText(null);
+        idOrden.setText("");
+        nombreContacto.setText("");
         nombreContacto.requestFocus();
-        telefonoContacto.setText(null);
-        detallesEntrega.setText(null);
-        detallesAdicionales.setText(null);
-        total.setText(null);
-        montoAbonado.setText(null);
-        descuento.setText(null);
-        montoPendiente.setText(null);
-        fechaEntrega.setValue(null);
-        status.setValue(null);
-        rptLineasDetalle.getRoot().getChildren().clear();
-        
+        telefonoContacto.setText("");
+        detallesEntrega.setText("");
+        detallesAdicionales.setText("");
+        montoAbonado.setText("0");
+        descuento.setText("0");
+        montoPendiente.setText("0");
+        total.setText("0");
+        fechaEntrega.setValue(LocalDate.now());
+        status.setValue(statusValues.get(0));
+        if(rptLineasDetalle.getRoot()!=null && rptLineasDetalle.getRoot().getChildren()!=null)
+            rptLineasDetalle.getRoot().getChildren().clear();
         // configurar botones
         btnGuardar.setText("Crear nueva");
         btnAgregarProductos.setDisable(true);
@@ -274,7 +289,7 @@ public class OrdenesViewController implements Initializable {
         System.out.println("eOrders - Abrir un alert con información del sistema.");
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("eOrders - XEVEN");
-        alert.setHeaderText("eOrders v1.0 - Sistema de gestión de órdenes");
+        alert.setHeaderText("eOrders v2.1 - Sistema de gestión de órdenes");
         alert.setContentText("Para mayor información contactarse a ordenes@xeven.com.ar");
         alert.showAndWait();
     }
@@ -300,12 +315,11 @@ public class OrdenesViewController implements Initializable {
         orderTable.getSelectionModel().clearSelection();
         orderTable.getSelectionModel().select(ordenActual);
     }
-    @FXML private void mostrarDetalleProducto(TreeTableColumn.CellEditEvent<LineaDetalle, String> event) {
+    @FXML public void mostrarDetalleProducto(TreeTableColumn.CellEditEvent<LineaDetalle, String> event) {
         System.out.println("Mostrar producto seleccionado");
     }
-
     @FXML private void cambioEstado(ActionEvent event) {
-        //actualizar el modelo al cambiar el estado (esto puede hacerse al guardar)
+        //actualizar el modelo al cambiar el estado
     }
 
     private void buscarOrdenes(String query) {
@@ -320,8 +334,20 @@ public class OrdenesViewController implements Initializable {
         );
     }
 
-    @FXML
-    private void buscar(KeyEvent event) {
+    @FXML private void buscar(KeyEvent event) {
         buscarOrdenes(buscador.getText());        
+    }
+
+    public void verProductos(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("ProductosView.fxml"));
+        Parent root = loader.load();
+        Stage stage=(Stage) buscador.getScene().getWindow();
+        Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+        stage.setMaximized(true);
+        stage.getIcons().add(new Image("/resources/color/001_56.png"));
+        stage.setTitle("eOrders - Productos- XEVEN");
+        stage.setScene(scene);
+        stage.show();
     }
 }

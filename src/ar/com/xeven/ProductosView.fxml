@@ -5,15 +5,13 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -22,38 +20,48 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="700" prefWidth="1000" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ar.com.xeven.ProductosViewController">
+<AnchorPane id="AnchorPane" prefHeight="768" prefWidth="1024" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ar.com.xeven.ProductosViewController">
     <children>
       <VBox focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <MenuBar nodeOrientation="LEFT_TO_RIGHT">
-              <menus>
-                <Menu text="Archivo">
-                  <items>
-                    <MenuItem fx:id="menuVerOrdenes" onAction="#verOrdenes" text="_Ver órdenes" />
-                    <MenuItem fx:id="menuCerrar" onAction="#cerrar" text="_Cerrar" />
-                  </items>
-                </Menu>
-                  <Menu mnemonicParsing="false" text="Productos">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#nuevo" text="Nuevo producto" />
-                        <MenuItem fx:id="menuProductos" mnemonicParsing="false" text="Ver productos" />
-                    </items>
-                  </Menu>
-                <Menu text="Ayuda">
-                  <items>
-                    <MenuItem fx:id="menuAbout" onAction="#acercaDe" text="Acerca de" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
+            <AnchorPane minWidth="500.0" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #95A9B2;">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER_LEFT" nodeOrientation="LEFT_TO_RIGHT" spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                      <Button fx:id="btnNuevo" mnemonicParsing="false" onAction="#nuevo" text="Nuevo producto" />
+                        <Button fx:id="menuVerOrdenes" mnemonicParsing="false" onAction="#verOrdenes" text="Ver órdenes" />
+                     </children>
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" minWidth="-Infinity" spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Button fx:id="menuAbout" mnemonicParsing="false" onAction="#acercaDe" text="Acerca de" />
+                        <Button fx:id="menuCerrar" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#cerrar" text="Cerrar" />
+                     </children>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </HBox>
+               </children>
+               <opaqueInsets>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </opaqueInsets>
+               <effect>
+                  <InnerShadow color="#8b8c9e" />
+               </effect>
+            </AnchorPane>
             <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                <children>
                   <VBox prefWidth="800.0">
                      <children>
                         <TextField fx:id="buscador" onKeyTyped="#buscar" promptText="Buscar producto">
                            <padding>
-                              <Insets left="8.0" />
+                              <Insets bottom="4.0" left="10.0" right="4.0" top="4.0" />
                            </padding>
                            <font>
                               <Font size="18.0" />
@@ -61,8 +69,8 @@
                         </TextField>
                         <TreeTableView fx:id="tablaProductos" editable="true" prefWidth="977.0" showRoot="false" VBox.vgrow="ALWAYS">
                           <columns>
-                            <TreeTableColumn fx:id="colNombre" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="200.0" text="Producto" />
-                              <TreeTableColumn fx:id="colDetalles" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="200.0" text="Detalles" />
+                            <TreeTableColumn fx:id="colNombre" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="Producto" />
+                              <TreeTableColumn fx:id="colDetalles" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="200.0" text="Detalles" />
                               <TreeTableColumn fx:id="colTamanio" maxWidth="300.0" minWidth="75.0" prefWidth="100.0" text="Tamaño" />
                               <TreeTableColumn fx:id="colPrecio" maxWidth="200.0" minWidth="75.0" prefWidth="100.0" text="Precio" />
                           </columns>
@@ -74,13 +82,13 @@
                   </VBox>
                  <GridPane fx:id="detallesProd" alignment="CENTER_LEFT" focusTraversable="true" prefHeight="671.0" prefWidth="763.0" vgap="5.0">
                      <columnConstraints>
-                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="160.0" minWidth="50.0" percentWidth="38.0" prefWidth="141.0" />
-                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="189.0" minWidth="50.0" percentWidth="34.0" prefWidth="189.0" />
-                         <ColumnConstraints hgrow="SOMETIMES" percentWidth="31.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="160.0" minWidth="50.0" percentWidth="34.0" prefWidth="141.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="160.0" minWidth="50.0" percentWidth="21.0" prefWidth="141.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="189.0" minWidth="50.0" percentWidth="36.0" prefWidth="189.0" />
+                         <ColumnConstraints hgrow="SOMETIMES" percentWidth="41.0" />
                      </columnConstraints>
                      <rowConstraints>
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -90,18 +98,32 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                         <Label text="Producto: " GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                         <Label fx:id="prodID" text="123" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                         <Label text="Nombre:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                         <TextField fx:id="nombreProducto" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                         <Label text="Producto:" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></Label>
+                         <Label fx:id="prodID" text="123" visible="false" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                         <TextField fx:id="nombreProducto" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></TextField>
                             
-                               <Label text="Fecha de precio:" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-                         <DatePicker fx:id="fechaPrecio" disable="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                               <Label text="Fecha de precio:" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></Label>
+                         <DatePicker fx:id="fechaPrecio" disable="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
 
-                               <Label text="Detalles:" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                        <TextArea fx:id="detallesProducto" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                      <Button fx:id="btnGuardar" defaultButton="true" disable="true" onAction="#guardar" text="_Guardar" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
-                        <TableView fx:id="tablaPrecios" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="5">
+                               <Label text="Detalles:" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></Label>
+                        <TextArea fx:id="detallesProducto" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></TextArea>
+                      <Button fx:id="btnGuardar" defaultButton="true" disable="true" onAction="#guardar" text="_Guardar" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+                        <TableView fx:id="tablaPrecios" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="4">
                           <columns>
                             <TableColumn fx:id="colTamanioPrecio1" minWidth="150.0" prefWidth="200.0" text="Tamaño" />
                             <TableColumn fx:id="colTamanioPrecio2" minWidth="100.0" prefWidth="150.0" text="Precio" />
@@ -110,11 +132,14 @@
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
                         </TableView>
-                        <CheckBox fx:id="soloAccesorio" mnemonicParsing="false" text="Sólo accesorio" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                        <TableView fx:id="accesorioTabla" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="7" GridPane.rowSpan="2">
+                        <CheckBox fx:id="soloAccesorio" mnemonicParsing="false" text="Sólo accesorio" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin></CheckBox>
+                        <TableView fx:id="accesorioTabla" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="6" GridPane.rowSpan="2">
                           <columns>
                             <TableColumn fx:id="accesorioNombre" editable="false" minWidth="100.0" prefWidth="100.0" text="Accesorio" />
-                            <TableColumn fx:id="accesorioDetalles" editable="false" minWidth="100.0" prefWidth="150.0" text="Detalles" />
+                            <TableColumn fx:id="accesorioDetalles" editable="false" minWidth="150.0" prefWidth="150.0" text="Detalles" />
                               <TableColumn fx:id="accesorioTamanio" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="Tamaño" />
                               <TableColumn fx:id="accesorioPrecio" maxWidth="500.0" minWidth="75.0" prefWidth="75.0" text="Precio" />
                           </columns>
@@ -122,18 +147,17 @@
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
                         </TableView>
-                        <Button fx:id="btnNuevo" mnemonicParsing="false" onAction="#nuevo" text="Nuevo" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
-                        <TextField fx:id="txtTamanio" promptText="Tamaño" GridPane.halignment="CENTER" GridPane.rowIndex="6">
+                        <TextField fx:id="txtTamanio" promptText="Tamaño" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="5">
+                           <GridPane.margin>
+                              <Insets bottom="2.0" left="5.0" right="5.0" top="2.0" />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="txtPrecio" promptText="Precio" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="5">
                            <GridPane.margin>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </GridPane.margin>
                         </TextField>
-                        <TextField fx:id="txtPrecio" promptText="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6">
-                           <GridPane.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </GridPane.margin>
-                        </TextField>
-                        <Button fx:id="botonAgregarPrecio" disable="true" mnemonicParsing="false" onAction="#agregarPrecio" text="Agregar" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+                        <Button fx:id="botonAgregarPrecio" disable="true" mnemonicParsing="false" onAction="#agregarPrecio" text="Agregar" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

@@ -5,9 +5,6 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -15,6 +12,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -22,31 +20,48 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="700" prefWidth="1000" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ar.com.xeven.OrdenesViewController">
+<AnchorPane id="AnchorPane" prefHeight="768" prefWidth="1024" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ar.com.xeven.OrdenesViewController">
     <children>
-      <MenuBar nodeOrientation="LEFT_TO_RIGHT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu text="Archivo">
-            <items>
-                  <MenuItem fx:id="menuNuevaOrden" onAction="#nuevaOrden" text="_Nueva orden" />
-              <MenuItem fx:id="menuEliminar" onAction="#eliminarOrden" text="_Eliminar" />
-              <MenuItem fx:id="menuCerrar" onAction="#cerrar" text="_Cerrar" />
-            </items>
-          </Menu>
-          <Menu text="Ayuda">
-            <items>
-              <MenuItem fx:id="menuAbout" onAction="#acercaDe" text="Acerca de" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-       <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="800.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="30.0">
+      <AnchorPane layoutX="10.0" layoutY="10.0" minWidth="500.0" nodeOrientation="LEFT_TO_RIGHT" style="-fx-background-color: #95A9B2;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" nodeOrientation="LEFT_TO_RIGHT" spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Button fx:id="btnNuevaOrden" mnemonicParsing="false" onAction="#nuevaOrden" text="Nueva orden" />
+                  <Button fx:id="menuEliminar" mnemonicParsing="false" onAction="#eliminarOrden" text="Eliminar" />
+                  <Button fx:id="menuVerProductos" mnemonicParsing="false" onAction="#verProductos" text="Ver productos" />
+                  <Button fx:id="btnAgregarProductos" onAction="#agregarProductos" text="Agregar productos" textAlignment="CENTER" />
+               </children>
+               <padding>
+                  <Insets left="5.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" minWidth="-Infinity" spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Button fx:id="menuAbout" mnemonicParsing="false" onAction="#acercaDe" text="Acerca de" />
+                  <Button fx:id="menuCerrar" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#cerrar" text="Cerrar" />
+               </children>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+            </HBox>
+         </children>
+         <opaqueInsets>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </opaqueInsets>
+         <effect>
+            <InnerShadow color="#8b8c9e" />
+         </effect>
+      </AnchorPane>
+       <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="800.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="40.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0">
              <children>
-                  <TextField nodeOrientation="LEFT_TO_RIGHT" fx:id="buscador" onKeyTyped="#buscar" promptText="Buscar..." AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TextField fx:id="buscador" nodeOrientation="LEFT_TO_RIGHT" onKeyTyped="#buscar" promptText="Buscar..." AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                        <Insets bottom="8.0" left="10.0" right="8.0" top="8.0" />
                      </padding>
                      <font>
                         <Font size="14.0" />
@@ -86,8 +101,8 @@
                          <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                         <RowConstraints maxHeight="62.0" minHeight="10.0" prefHeight="62.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="84.0" minHeight="10.0" prefHeight="56.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
@@ -98,40 +113,29 @@
                          <Label text="Teléfono:" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                          <TextField fx:id="telefonoContacto" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                             
-                         <Label text="Fecha de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                         <DatePicker fx:id="fechaEntrega" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                         <Label text="Fecha de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                         <DatePicker fx:id="fechaEntrega" GridPane.columnIndex="5" GridPane.rowIndex="1" />
 
                          <Label text="Observaciones:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
                          <Label text="Total:" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
                          <Label fx:id="total" GridPane.columnIndex="3" GridPane.halignment="LEFT" />
                          <Label text="Monto abonado:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                          <TextField fx:id="montoAbonado" maxWidth="200.0" minWidth="100.0" onInputMethodTextChanged="#actualizarMontos" prefWidth="200.0" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                         <Label text="Deuda:" textFill="#5e0606" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-                         <Label fx:id="montoPendiente" GridPane.columnIndex="5" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
+                         <Label text="Deuda:" textFill="#5e0606" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                         <Label fx:id="montoPendiente" GridPane.columnIndex="5" GridPane.halignment="LEFT" />
    
-                         <Label text="Detalles de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                         <TextArea fx:id="detallesEntrega" maxHeight="150.0" prefHeight="50.0" prefWidth="100.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="3" GridPane.rowSpan="2" />
-   
-                         <Label text="Estado:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
-                         <ComboBox fx:id="status" onAction="#cambioEstado" GridPane.columnIndex="5" GridPane.rowIndex="7" />
-   
-                         <HBox alignment="BOTTOM_RIGHT" fillHeight="false" prefHeight="100.0" spacing="15" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER">
-      <children>
-                            <Button fx:id="btnNuevaOrden" onAction="#nuevaOrden" text="Nueva _orden" />
-                            <Button fx:id="btnGuardar" defaultButton="true" onAction="#guardarOrden" text="_Guardar cambios" />
-      </children>
-                           <GridPane.margin>
-                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                           </GridPane.margin>
-                        </HBox>
-                        <TextArea fx:id="detallesAdicionales" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="5" GridPane.rowSpan="2" />
-                        <Label layoutX="418.0" layoutY="16.0" text="Descuento:" GridPane.columnIndex="4" GridPane.halignment="CENTER" />
-                        <TextField fx:id="descuento" layoutX="515.0" layoutY="39.0" maxWidth="200.0" minWidth="100.0" onInputMethodTextChanged="#actualizarMontos" prefWidth="200.0" GridPane.columnIndex="5" />
+                         <Label text="Detalles de entrega:" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                         <TextArea fx:id="detallesEntrega" maxHeight="150.0" prefHeight="50.0" prefWidth="100.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="2" GridPane.rowSpan="3" />
+                         <ComboBox fx:id="status" onAction="#cambioEstado" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+                      <Button fx:id="btnGuardar" defaultButton="true" onAction="#guardarOrden" text="_Guardar cambios" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+                        <TextArea fx:id="detallesAdicionales" maxHeight="150.0" prefHeight="50.0" prefWidth="50.0" wrapText="true" GridPane.columnIndex="5" GridPane.rowIndex="5" GridPane.rowSpan="3" />
+                        <Label layoutX="418.0" layoutY="16.0" text="Descuento:" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                        <TextField fx:id="descuento" layoutX="515.0" layoutY="39.0" maxWidth="200.0" minWidth="100.0" onInputMethodTextChanged="#actualizarMontos" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                         <TreeTableView fx:id="rptLineasDetalle" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
                           <columns>
+                              <TreeTableColumn fx:id="colCantidad" maxWidth="100.0" minWidth="75.0" prefWidth="75.0" text="Cantidad" />
                             <TreeTableColumn fx:id="colProducto" maxWidth="800.0" minWidth="100.0" onEditStart="#mostrarDetalleProducto" prefWidth="250.0" text="Producto" />
                             <TreeTableColumn fx:id="colTamanio" maxWidth="400.0" minWidth="100.0" prefWidth="110.0" text="Tamaño" />
-                              <TreeTableColumn fx:id="colCantidad" maxWidth="100.0" minWidth="75.0" prefWidth="75.0" text="Cantidad" />
                               <TreeTableColumn fx:id="colPrecioUnitario" maxWidth="250.0" minWidth="75.0" prefWidth="110.0" text="Precio unitario" />
                               <TreeTableColumn fx:id="colSubtotal" maxWidth="250.0" minWidth="75.0" prefWidth="110.0" text="Subtotal" />
                               <TreeTableColumn fx:id="colTotal" maxWidth="300.0" minWidth="75.0" prefWidth="110.0" text="Total" />
@@ -140,7 +144,6 @@
                               <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
                         </TreeTableView>
-                        <Button fx:id="btnAgregarProductos" onAction="#agregarProductos" text="Agregar productos" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

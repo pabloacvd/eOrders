@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 30, 2017 at 07:15 AM
+-- Generation Time: Oct 01, 2017 at 02:53 PM
 -- Server version: 5.7.19
 -- PHP Version: 5.6.30
 
@@ -66,6 +66,15 @@ INSERT INTO `accesoriosPorProducto` (`prodID`, `accesorio`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `accesoriosview`
+-- (See below for the actual view)
+--
+CREATE TABLE `accesoriosview` (
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `lineasDetalle`
 --
 
@@ -122,8 +131,8 @@ CREATE TABLE `ordenes` (
 
 INSERT INTO `ordenes` (`idOrden`, `nombreContacto`, `telefonoContacto`, `detallesAdicionales`, `fechaEntrega`, `detallesEntrega`, `montoAbonado`, `descuento`, `status`) VALUES
 (1, 'Pablo Acevedo A', '+541553473440', 'N/A', '2017-09-29', 'Retira por local', 100, 50, 'Preparado'),
-(2, 'Pablo Areco', '234', 'asdfasf', '2017-09-28', 'Retira por local', 0, 0, 'Entregado'),
-(3, 'Pablo Acevedo Areco', '+5491123456789', 'Profe JavaSE8', '2017-10-19', 'Retira por local 13hs', 10, 5, 'Cancelado'),
+(2, 'Pablo Areco', '2344555', 'asdfasf', '2017-09-28', 'Retira por local', 0, 0, 'Cancelado'),
+(3, 'Pablo Acevedo Areco', '+5491123456789', 'Profe JavaSE8', '2017-10-19', 'Retira por local 13hs', 10, 5, 'Entregado'),
 (4, 'Richard Stallman', '+3445566', 'GNU dad', '2017-07-31', 'Entregar por DHL a USA', 2, 3, 'Cancelado'),
 (5, 'Linus Torvalds', '+358 91911', 'GIT and Linux dad', '2017-07-30', 'Entregar por DHL a Finlandia', 1, 0, 'Confirmado');
 
@@ -153,6 +162,15 @@ INSERT INTO `productos` (`prodID`, `nombreProducto`, `detallesProducto`, `precio
 (21, 'Picada economica ', 'queso tybo\njamon cocido\nmortadela \nsalame milan \nsalamin \nbondiola \nqueso pategras \naceitunas descarozadas\nespaditas de copetin ', '{\"individual\":165.0,\"2 personas \":330.0,\"3 personas \":380.0,\"4 personas \":480.0,\"5 personas \":580.0}', '2017-09-26', 0),
 (22, 'Matambre', 'Cortado en 22 rodajas ', '{\"Unitario\":450.0}', '2017-09-26', 0),
 (23, 'Sanwhiches de chips ', 'jamon y queso ', '{\"la docena \":75.0}', '2017-09-26', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `accesoriosview`
+--
+DROP TABLE IF EXISTS `accesoriosview`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `accesoriosview`  AS  select concat('Accesorios para ',`P`.`nombreProducto`,' (prodID=',`P`.`prodID`,')') AS `Producto`,`O`.`prodID` AS `prodID`,`O`.`nombreProducto` AS `nombreProducto`,`O`.`detallesProducto` AS `detallesProducto`,`O`.`precioPorTamanio` AS `precioPorTamanio`,`O`.`fechaModificacionPrecio` AS `fechaModificacionPrecio`,`o`.`accesorios` AS `accesorios` from ((`productos` `P` join `accesoriosporproducto` `A` on((`a`.`prodID` = `p`.`prodID`))) join `productos` `O` on((`a`.`accesorio` = `o`.`prodID`))) where (`p`.`prodID` = 4) ;
 
 --
 -- Indexes for dumped tables

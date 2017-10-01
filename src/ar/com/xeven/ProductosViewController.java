@@ -64,10 +64,7 @@ import javafx.util.converter.DoubleStringConverter;
  * @author pacevedo
  */
 public class ProductosViewController implements Initializable {
-    @FXML private MenuItem menuCerrar;
-    @FXML private MenuItem menuAbout;
     @FXML private DatePicker fechaPrecio;
-    @FXML private Button btnGuardar;
     @FXML private TreeTableView<Producto> tablaProductos;
     @FXML private TreeTableColumn<Producto, String> colNombre;
     @FXML private TreeTableColumn<Producto, String> colDetalles;
@@ -78,7 +75,6 @@ public class ProductosViewController implements Initializable {
     @FXML private TextField nombreProducto;
     @FXML private TextArea detallesProducto;
     @FXML private CheckBox soloAccesorio;
-    @FXML private Button btnNuevo;
     @FXML private TableView<Map.Entry<String, Double>> tablaPrecios;
     @FXML private TableColumn<Map.Entry<String, Double>, String> colTamanioPrecio1;
     @FXML private TableColumn<Map.Entry<String, Double>, Double> colTamanioPrecio2;
@@ -87,18 +83,18 @@ public class ProductosViewController implements Initializable {
     @FXML private TableColumn<Producto, String> accesorioDetalles;
     @FXML private TableColumn<Producto, String> accesorioTamanio;
     @FXML private TableColumn<Producto, String> accesorioPrecio;
-    @FXML private MenuItem menuProductos;
     @FXML private TextField txtTamanio;
     @FXML private TextField txtPrecio;
+    @FXML private Button menuCerrar;
+    @FXML private Button menuAbout;
+    @FXML private Button btnGuardar;
+    @FXML private Button btnNuevo;
+    @FXML private Button menuVerOrdenes;
     @FXML private Button botonAgregarPrecio;
-    
+    @FXML private TextField buscador;  
     private double scrollDirection = 0;
     private Timeline scrolltimeline = new Timeline();
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
-    @FXML
-    private TextField buscador;
-    @FXML
-    private MenuItem menuVerOrdenes;
 
     public void cargarProductos(String query){
         Connection c = XEVEN.getConnection();
@@ -150,13 +146,20 @@ public class ProductosViewController implements Initializable {
         tablaProductos.setRowFactory(this::rowFactory);
         // agrego un listener para la seleccion de un elemento de la tabla
         // esto hace que se pueda a mostrarDetallesOrden() el elemento elegido
-        tablaProductos.getSelectionModel().selectedIndexProperty().addListener(
-                (observable, valorOriginal, valorNuevo) -> 
-                mostrarDetallesProducto(tablaProductos.getSelectionModel().getSelectedItem().getValue()));
+        tablaProductos.getSelectionModel().selectedIndexProperty().addListener((observable, valorOriginal, valorNuevo) -> {
+            if(tablaProductos.getSelectionModel().getSelectedItem()!=null)
+                mostrarDetallesProducto(tablaProductos.getSelectionModel().getSelectedItem().getValue());
+            });
         //configuro los botones
         btnGuardar.setDisable(true);      
         btnGuardar.setGraphic(new ImageView(new Image("/resources/color/001_06.png", true)));
-        btnNuevo.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));    
+        botonAgregarPrecio.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
+        btnNuevo.setGraphic(new ImageView(new Image("/resources/color/001_45.png", true)));
+        botonAgregarPrecio.setGraphic(new ImageView(new Image("/resources/color/001_01.png", true)));
+        menuCerrar.setGraphic(new ImageView(new Image("/resources/grey/001_42.png", true)));
+        menuAbout.setGraphic(new ImageView(new Image("/resources/color/001_42.png", true)));
+        menuVerOrdenes.setGraphic(new ImageView(new Image("/resources/color/001_43.png", true)));
+        
         //configuro el scroll para el drag&drop
         setupScrolling();
         //cargo el menu contextual
@@ -274,7 +277,7 @@ public class ProductosViewController implements Initializable {
         System.out.println("eOrders - Abrir un alert con información del sistema.");
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("eOrders - XEVEN");
-        alert.setHeaderText("eOrders v1.0 - Sistema de gestión de órdenes");
+        alert.setHeaderText("eOrders v2.1 - Sistema de gestión de órdenes");
         alert.setContentText("Para mayor información contactarse a ordenes@xeven.com.ar");
         alert.showAndWait();
     }
@@ -419,19 +422,20 @@ public class ProductosViewController implements Initializable {
         txtPrecio.setText("");
         txtTamanio.setText("");
     }
-    @FXML
-    private void buscar(KeyEvent event) {
+    @FXML private void buscar(KeyEvent event) {
         cargarProductos(buscador.getText());
     }
 
-    @FXML
-    private void verOrdenes(ActionEvent event) throws IOException {
+    @FXML private void verOrdenes(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("OrdenesView.fxml"));
         Parent root = loader.load();
-        Stage stage=(Stage) tablaPrecios.getScene().getWindow();
-        Scene scene = new Scene(root);
+        Stage stage=(Stage) buscador.getScene().getWindow();
+        Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
         stage.setScene(scene);
+        stage.setMaximized(true);
+        stage.getIcons().add(new Image("/resources/color/001_56.png"));
+        stage.setTitle("eOrders - Órdenes - XEVEN");
         stage.show();
     }
 }

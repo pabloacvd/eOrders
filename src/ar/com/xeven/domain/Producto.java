@@ -101,9 +101,8 @@ public class Producto {
                 this.accesoriosDisponibles = new SimpleListProperty<>(accesorios);
                 this.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        } catch (SQLException ex) {Logger.getLogger("Producto").log(Level.SEVERE, null, ex);
+        }finally {
             try{    rs.close();     } catch (SQLException e){}
             try{    stmt.close();   } catch (SQLException e){}
         }
@@ -129,9 +128,7 @@ public class Producto {
             rs = pstmt.getGeneratedKeys();
             while(rs.next())
                 prodID = rs.getInt(1);
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (SQLException ex) {Logger.getLogger("Producto").log(Level.SEVERE, null, ex);}
         this.prodID = new SimpleStringProperty(prodID.toString());
         this.nombreProducto = new SimpleStringProperty(nombreProducto);
         this.detallesProducto = new SimpleStringProperty(detallesProducto);
@@ -147,9 +144,7 @@ public class Producto {
             pstmt.setString(2, mapaJson);
             pstmt.setInt(3, Integer.valueOf(this.prodID.get()));
             pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (SQLException ex) {Logger.getLogger("Producto").log(Level.SEVERE, null, ex);}
         this.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precios));
     }
 
@@ -235,10 +230,13 @@ public class Producto {
                         rs.getString("detallesProducto"));
                 if(rs.getDate("fechaModificacionPrecio") != null)
                     unProducto.fechaModificacionPrecio = new SimpleObjectProperty<>(rs.getDate("fechaModificacionPrecio").toLocalDate());
+                else
+                    unProducto.fechaModificacionPrecio = new SimpleObjectProperty<>();
                 if(rs.getString("precioPorTamanio") !=null){
                     LinkedHashMap<String,Double> precioPorTamanio = new Gson().fromJson(rs.getString("precioPorTamanio"), new TypeToken<LinkedHashMap<String, Double>>(){}.getType());
                     unProducto.precioPorTamanio = new SimpleMapProperty<>(FXCollections.observableMap(precioPorTamanio));
-                }
+                }else
+                    unProducto.precioPorTamanio = new SimpleMapProperty<>();
                 unProducto.accesoriosDisponibles = new SimpleListProperty<>(accesoriosDelAccesorio);
                 unProducto.setSoloAccesorio(rs.getBoolean("soloAccesorio"));
                 lstAccesorios.add(unProducto);
@@ -266,8 +264,7 @@ public class Producto {
         } catch (SQLException ex) {
             resultado = false;
         } finally {
-            try{    stmt.close();   } catch (SQLException e){}       
-            try{    laConexion.close();   } catch (SQLException e){}       
+            try{ stmt.close(); }catch(SQLException e){}       
         }
         return resultado;
     }
@@ -286,7 +283,6 @@ public class Producto {
             resultado = false;
         } finally {
             try{    stmt.close();   } catch (SQLException e){}       
-            try{    laConexion.close();   } catch (SQLException e){}       
         }
         return resultado;
     }
@@ -309,9 +305,7 @@ public class Producto {
             pstmt.setBoolean(3, this.soloAccesorio);
             pstmt.setString(4, this.getProdID().get());
             pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (SQLException e) {Logger.getLogger("Producto").log(Level.SEVERE, null, e);}
     }
     public void eliminar(){
         eliminarProductoComoAccesorio();
@@ -321,9 +315,7 @@ public class Producto {
             PreparedStatement pstmt = c.prepareStatement(sql);
             pstmt.setString(1, this.getProdID().get());
             pstmt.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (SQLException e) {Logger.getLogger("Producto").log(Level.SEVERE, null, e);}
     }
     @Override
     public String toString() {
@@ -336,7 +328,6 @@ public class Producto {
         mapa.put(nuevoTamanio, nuevoPrecio);
         actualizarPrecios(mapa);
     }
-
     public void eliminarPrecio(String key) {
         ObservableMap<String,Double> mapa = precioPorTamanio.get();
         mapa.remove(key);
