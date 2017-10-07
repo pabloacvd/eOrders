@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  * Created by pacevedo on 5/08/17.
  */
@@ -55,8 +57,16 @@ public class XEVEN {
                 con = DriverManager.getConnection(url, usr, pwd);
             }
             return con;
-        } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException("La conexión no pudo ser establecida.", e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("La conexión no pudo ser establecida con el driver.", e);
+        } catch (SQLException e) {
+            System.out.println("La conexión no pudo ser establecida con la base de datos. Reintentando.");
+            try {
+                con = DriverManager.getConnection("jdbc:mysql://localhost/eorders", "root", "");
+            } catch (SQLException ex) {
+                throw new RuntimeException("La conexión no pudo ser establecida con el driver.", ex);
+            }
+            return con;
         }
     }
 
